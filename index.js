@@ -72,32 +72,41 @@ FritzPlatform.prototype = {
         // wifi
         accessories.push(new FritzWifiAccessory(this));
 
-        // outlets
-        this.fritz("getSwitchList").then(function(ains) {
-            self.log("Outlets found: %s", ains.toString());
+        this.fritz("getDeviceList").then(function(devices) {
+            // cache list of devices in options for reuse by non-API functions
+            self.options.deviceList = devices;
 
-            ains.forEach(function(ain) {
-                accessories.push(new FritzOutletAccessory(self, ain));
-            });
-
-            // thermostats
-            self.fritz('getThermostatList').then(function(ains) {
-                self.log("Thermostats found: %s", ains.toString());
+            // outlets
+            self.fritz("getSwitchList").then(function(ains) {
+                self.log("Outlets found: %s", ains.toString());
 
                 ains.forEach(function(ain) {
-                    accessories.push(new FritzThermostatAccessory(self, ain));
+                    accessories.push(new FritzOutletAccessory(self, ain));
                 });
 
-                callback(accessories);
+                // thermostats
+                self.fritz('getThermostatList').then(function(ains) {
+                    self.log("Thermostats found: %s", ains.toString());
+
+                    ains.forEach(function(ain) {
+                        accessories.push(new FritzThermostatAccessory(self, ain));
+                    });
+
+                    callback(accessories);
+                });
             });
         });
     },
 
+    getDevice: function(ain) {
+        return this.options.deviceList.find(function(device) {
+            return device.identifier.replace(/\s/g, '') == ain;
+        });
+    },
+
     getName: function(ain) {
-        if (this.config.names && this.config.names.ain)
-            return this.config.names.ain;
-        else
-            return ain;
+        var dev = this.getDevice(ain);
+        return dev ? dev.name || ain : ain;
     },
 
     fritz: function(func) {
@@ -155,10 +164,7 @@ function FritzWifiAccessory(platform) {
     this.platform = platform;
     this.name = "Guest WLAN";
 
-    this.service = new Service.Switch("Guest WLAN")
-        // .setCharacteristic(Characteristic.Manufacturer, "AVM")
-        // .setCharacteristic(Characteristic.Model, "FRITZ!Box")
-    ;
+    this.service = new Service.Switch("Guest WLAN");
 
     this.service.getCharacteristic(Characteristic.On)
         .on('get', this.getOn.bind(this))
@@ -210,15 +216,15 @@ function FritzOutletAccessory(platform, ain) {
     this.ain = ain;
     this.name = this.platform.getName(this.ain);
 
-    this.services = {
-        Outlet: new Service.Outlet(this.ain)
-            // .setCharacteristic(Characteristic.Manufacturer, "AVM")
-            // .setCharacteristic(Characteristic.Model, "FRITZ!DECT 200"),
-        ,
+    var device = this.platform.getDevice(this.ain);
 
+    this.services = {
+        AccessoryInformation: new Service.AccessoryInformation()
+            .setCharacteristic(Characteristic.Manufacturer, device.manufacturer)
+            .setCharacteristic(Characteristic.Model, device.productname)
+        ,
+        Outlet: new Service.Outlet(this.ain),
         TemperatureSensor: new Service.TemperatureSensor(this.ain)
-            // .setCharacteristic(Characteristic.Manufacturer, "AVM")
-            // .setCharacteristic(Characteristic.Model, "FRITZ!DECT 200")
     };
 
     this.services.Outlet.getCharacteristic(Characteristic.On)
@@ -319,25 +325,30 @@ function FritzThermostatAccessory(platform, ain) {
     this.ain = ain;
     this.name = this.platform.getName(this.ain);
 
-    this.service = new Service.Thermostat(this.ain)
-        // .setCharacteristic(Characteristic.Manufacturer, "EUROtronic")
-        // .setCharacteristic(Characteristic.Model, "Comet DECT")
-    ;
+    var device = this.platform.getDevice(this.ain);
 
-    this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+    this.services = {
+        AccessoryInformation: new Service.AccessoryInformation()
+            .setCharacteristic(Characteristic.Manufacturer, device.manufacturer)
+            .setCharacteristic(Characteristic.Model, device.productname)
+        ,
+        Thermostat: new Service.Thermostat(this.ain)
+    }
+
+    this.services.Thermostat.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
         .on('get', this.getCurrentHeatingCoolingState.bind(this))
     ;
-    this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+    this.services.Thermostat.getCharacteristic(Characteristic.TargetHeatingCoolingState)
         .on('get', this.getTargetHeatingCoolingState.bind(this))
     ;
-    this.service.getCharacteristic(Characteristic.CurrentTemperature)
+    this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.getCurrentTemperature.bind(this))
     ;
-    this.service.getCharacteristic(Characteristic.TargetTemperature)
+    this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature)
         .on('get', this.getTargetTemperature.bind(this))
         .on('set', this.setTargetTemperature.bind(this))
     ;
-    this.service.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+    this.services.Thermostat.getCharacteristic(Characteristic.TemperatureDisplayUnits)
         .on('get', this.getTemperatureDisplayUnits.bind(this))
     ;
 
@@ -345,7 +356,10 @@ function FritzThermostatAccessory(platform, ain) {
 }
 
 FritzThermostatAccessory.prototype.getServices = function() {
-    return [this.service];
+    var self = this;
+    return Object.keys(this.services).map(function(key) {
+        return self.services[key];
+    });
 };
 
 FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(callback) {
@@ -392,6 +406,6 @@ FritzThermostatAccessory.prototype.update = function() {
     var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.service.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+        self.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
     });
 };
