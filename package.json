@@ -1,6 +1,6 @@
 {
   "name": "homebridge-fritz",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Homebridge platform plugin for Fritz!Box",
   "license": "MIT",
   "main": "index.js",

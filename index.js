@@ -8,27 +8,15 @@
 var fritz = require('smartfritz-promise');
 var promise = require('bluebird');
 var isWebUri = require('valid-url').isWebUri;
-var Service, Accessory, Characteristic, PowerUsage;
+var inherits = require('util').inherits;
+var Service, Accessory, Characteristic;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
     Accessory = homebridge.hap.Accessory;
 
-    // @TODO check
-    // require('util').inherits(FritzPlatform.PowerUsage, Characteristic);
-    PowerUsage = function() {
-        Characteristic.call(this, 'Power Usage', 'AE48F447-E065-4B31-8050-8FB06DB9E087');
-
-        this.setProps({
-            format: Characteristic.Formats.FLOAT,
-            unit: 'W',
-            perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
-        });
-
-        this.value = this.getDefaultValue();
-    };
-    require('util').inherits(PowerUsage, Characteristic);
+    inherits(FritzPlatform.PowerUsage, Characteristic);
 
     homebridge.registerPlatform("homebridge-fritz", "Fritz!Box", FritzPlatform);
 };
@@ -123,7 +111,7 @@ FritzPlatform.prototype = {
                 var funcArgs = [self.sid].concat(args).concat(self.options);
 
                 if (self.config.debug)
-                    self.log("> %s (%s)", func, JSON.stringify(funcArgs).slice(1,-1));
+                    self.log("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
 
                 return fritzFunc.apply(self, funcArgs).catch(function(error) {
                     if (error.response && error.response.statusCode == 403) {
@@ -140,7 +128,9 @@ FritzPlatform.prototype = {
                 });
             })
             .catch(function(error) {
-                self.log("> %s error - retrying in 3 seconds", func);
+                self.log.warn("> %s failed - retrying in 3 seconds", func);
+                self.log.error(error);
+
                 return promise.delay(3000).then(function() {
                     self.promise = null;
                     return self.fritz.apply(self, [func].concat(args));
@@ -148,7 +138,7 @@ FritzPlatform.prototype = {
             })
         ;
 
-        if (self.config.debug) {
+        if (this.config.debug) {
             this.promise.then(function(res) {
                 self.log("> %s %s", func, JSON.stringify(res));
                 return res;
@@ -156,6 +146,12 @@ FritzPlatform.prototype = {
         }
 
         return this.promise;
+    },
+
+    getServices: function(services) {
+        return Object.keys(services).map(function(key) {
+            return services[key];
+        });        
     }
 };
 
@@ -203,11 +199,10 @@ FritzWifiAccessory.prototype.setOn = function(on, callback, context) {
 
 FritzWifiAccessory.prototype.update = function() {
     this.platform.log("Updating guest WLAN");
-    var self = this;
 
     this.platform.fritz('getGuestWlan').then(function(res) {
-        self.service.getCharacteristic(Characteristic.On).setValue(res.activate_guest_access, undefined, FritzPlatform.Context);
-    });
+        this.service.getCharacteristic(Characteristic.On).setValue(res.activate_guest_access, undefined, FritzPlatform.Context);
+    }.bind(this));
 };
 
 
@@ -240,7 +235,7 @@ function FritzOutletAccessory(platform, ain) {
         .on('getInUse', this.getInUse.bind(this))
     ;
 
-    this.services.Outlet.addCharacteristic(PowerUsage)
+    this.services.Outlet.addCharacteristic(FritzPlatform.PowerUsage)
         .on('get', this.getPowerUsage.bind(this))
     ;
 
@@ -252,10 +247,7 @@ function FritzOutletAccessory(platform, ain) {
 }
 
 FritzOutletAccessory.prototype.getServices = function() {
-    var self = this;
-    return Object.keys(this.services).map(function(key) {
-        return self.services[key];
-    });
+    return this.platform.getServices(this.services);
 };
 
 FritzOutletAccessory.prototype.getOn = function(callback) {
@@ -294,6 +286,14 @@ FritzOutletAccessory.prototype.getPowerUsage = function(callback) {
     });
 };
 
+FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
+    this.platform.log("Getting outlet " + this.ain + " temperature");
+
+    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
+        callback(null, temp);
+    });
+};
+
 FritzOutletAccessory.prototype.update = function() {
     this.platform.log("Updating outlet " + this.ain);
     var self = this;
@@ -303,19 +303,12 @@ FritzOutletAccessory.prototype.update = function() {
 
         self.platform.fritz('getSwitchPower', self.ain).then(function(power) {
             self.services.Outlet.getCharacteristic(Characteristic.OutletInUse).setValue(power > 0, undefined, FritzPlatform.Context);
+            self.services.Outlet.getCharacteristic(FritzPlatform.PowerUsage).setValue(power, undefined, FritzPlatform.Context);
 
             self.platform.fritz('getTemperature', self.ain).then(function(temp) {
                 self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
             });
         });
-    });
-};
-
-FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " temperature");
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        callback(null, temp);
     });
 };
 
@@ -360,14 +353,18 @@ function FritzThermostatAccessory(platform, ain) {
 }
 
 FritzThermostatAccessory.prototype.getServices = function() {
-    var self = this;
-    return Object.keys(this.services).map(function(key) {
-        return self.services[key];
-    });
+    return this.platform.getServices(this.services);
 };
 
 FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(callback) {
-    callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+    this.platform.log("Getting thermostat " + this.ain + " heating state");
+
+    this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
+        if (temp == 'off')
+            callback(null, Characteristic.CurrentHeatingCoolingState.OFF);
+        else
+            callback(null, Characteristic.CurrentHeatingCoolingState.HEAT);
+    });
 };
 
 FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callback) {
@@ -386,8 +383,13 @@ FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
     this.platform.log("Getting thermostat " + this.ain + " target temperature");
 
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
-        callback(null, temp);
-    });
+        if (temp == 'off')
+            callback(null, this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.minValue);
+        else if (temp == 'on')
+            callback(null, this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.maxValue);
+        else
+            callback(null, temp);
+    }.bind(this));
 };
 
 FritzThermostatAccessory.prototype.setTargetTemperature = function(temp, callback, context) {
@@ -407,9 +409,8 @@ FritzThermostatAccessory.prototype.getTemperatureDisplayUnits = function(callbac
 
 FritzThermostatAccessory.prototype.update = function() {
     this.platform.log("Updating thermostat " + this.ain + " temperature");
-    var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
-    });
+        this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+    }.bind(this));
 };
