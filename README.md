@@ -33,7 +33,7 @@ Add platform to `config.json`, for configuration see below.
       "name": "My FritzBox",
       "username": "<username>",
       "password": "<password>",
-      "url": "192.168.0.1",
+      "url": "http://fritz.box",
       "interval": 60,
       "debug": false
     }

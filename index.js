@@ -7,6 +7,7 @@
 
 var fritz = require('smartfritz-promise');
 var promise = require('bluebird');
+var isWebUri = require('valid-url').isWebUri;
 var Service, Accessory, Characteristic, PowerUsage;
 
 module.exports = function(homebridge) {
@@ -42,8 +43,11 @@ function FritzPlatform(log, config) {
     this.config = config;
 
     this.options = this.config.options || {};
-    this.options.url = this.config.url || '192.168.0.1';
+    this.options.url = this.config.url || 'http://fritz.box';
     this.interval = 1000 * (this.config.interval || 60);  // 1 minute
+
+    // fritz url
+    if (!isWebUri(this.options.url)) this.log.warn("Invalid Fritz!Box url - forgot http(s)://?");
 
     this.promise = null;
 }

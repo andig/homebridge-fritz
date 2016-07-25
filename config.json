@@ -5,9 +5,9 @@
     {
       "platform": "Fritz!Box",
       "name": "My FritzBox",
-      "url": "192.168.0.1",
-      "username": "<user>",
+      "username": "<username>",
       "password": "<password>",
+      "url": "http://fritz.box",
       "interval": 60,
       "debug": false
     }
