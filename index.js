@@ -115,7 +115,7 @@ FritzPlatform.prototype = {
                 var funcArgs = [self.sid].concat(args).concat(self.options);
 
                 if (self.config.debug)
-                    self.log("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
+                    self.log.debug("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
 
                 return fritzFunc.apply(self, funcArgs).catch(function(error) {
                     if (error.response && error.response.statusCode == 403) {
@@ -133,7 +133,7 @@ FritzPlatform.prototype = {
             })
             .catch(function(error) {
                 self.log.warn("> %s failed - retrying in 3 seconds", func);
-                self.log.error(error);
+                self.log.warn(error);
 
                 return promise.delay(3000).then(function() {
                     self.promise = null;
@@ -144,7 +144,7 @@ FritzPlatform.prototype = {
 
         if (this.config.debug) {
             this.promise.then(function(res) {
-                self.log("> %s %s", func, JSON.stringify(res));
+                self.log.debug("> %s %s", func, JSON.stringify(res));
                 return res;
             });
         }
@@ -155,7 +155,7 @@ FritzPlatform.prototype = {
     getServices: function(services) {
         return Object.keys(services).map(function(key) {
             return services[key];
-        });        
+        });
     }
 };
 
