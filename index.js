@@ -91,9 +91,13 @@ FritzPlatform.prototype = {
     },
 
     getDevice: function(ain) {
-        return this.options.deviceList.find(function(device) {
-            return device.identifier.replace(/\s/g, '') == ain;
-        });
+        var name;
+        if (this.options.deviceList) {
+            name = this.options.deviceList.find(function(device) {
+                return device.identifier.replace(/\s/g, '') == ain;
+            });
+        }
+        return name || ain;
     },
 
     getName: function(ain) {
