@@ -168,7 +168,7 @@ function FritzWifiAccessory(platform) {
     this.platform = platform;
     this.name = "Guest WLAN";
 
-    this.service = new Service.Switch("Guest WLAN");
+    this.service = new Service.Switch(this.name);
 
     this.service.getCharacteristic(Characteristic.On)
         .on('get', this.getOn.bind(this))
@@ -225,9 +225,10 @@ function FritzOutletAccessory(platform, ain) {
         AccessoryInformation: new Service.AccessoryInformation()
             .setCharacteristic(Characteristic.Manufacturer, device.manufacturer)
             .setCharacteristic(Characteristic.Model, device.productname)
+            .setCharacteristic(Characteristic.SerialNumber, this.ain)
         ,
-        Outlet: new Service.Outlet(this.ain),
-        TemperatureSensor: new Service.TemperatureSensor(this.ain)
+        Outlet: new Service.Outlet(this.name),
+        TemperatureSensor: new Service.TemperatureSensor(this.name)
     };
 
     this.services.Outlet.getCharacteristic(Characteristic.On)
@@ -332,8 +333,9 @@ function FritzThermostatAccessory(platform, ain) {
         AccessoryInformation: new Service.AccessoryInformation()
             .setCharacteristic(Characteristic.Manufacturer, device.manufacturer)
             .setCharacteristic(Characteristic.Model, device.productname)
+            .setCharacteristic(Characteristic.SerialNumber, this.ain)
         ,
-        Thermostat: new Service.Thermostat(this.ain)
+        Thermostat: new Service.Thermostat(this.name)
     }
 
     this.services.Thermostat.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
