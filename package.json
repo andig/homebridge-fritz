@@ -1,6 +1,6 @@
 {
   "name": "homebridge-fritz",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Homebridge platform plugin for Fritz!Box",
   "license": "MIT",
   "main": "index.js",
@@ -25,7 +25,7 @@
     "Siri"
   ],
   "dependencies": {
-    "smartfritz-promise": "^0.6.0",
+    "smartfritz-promise": "^0.6.1",
     "valid-url": "^1.0.9",
     "bluebird": "^3.3.5"
   },
