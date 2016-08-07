@@ -17,6 +17,7 @@ module.exports = function(homebridge) {
     Characteristic = homebridge.hap.Characteristic;
 
     inherits(FritzPlatform.PowerUsage, Characteristic);
+    inherits(FritzPlatform.EnergyConsumption, Characteristic);
 
     homebridge.registerPlatform("homebridge-fritz", "Fritz!Box", FritzPlatform);
 };
@@ -48,6 +49,18 @@ FritzPlatform.PowerUsage = function() {
     this.setProps({
         format: Characteristic.Formats.FLOAT,
         unit: 'W',
+        perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
+
+    this.value = this.getDefaultValue();
+};
+
+FritzPlatform.EnergyConsumption = function() {
+    Characteristic.call(this, 'Energy Consumption', 'C4805C5B-45B7-4E5B-BFCB-FE43E0FBC1E5');
+
+    this.setProps({
+        format: Characteristic.Formats.FLOAT,
+        unit: 'kWh',
         perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
     });
 
@@ -258,6 +271,11 @@ function FritzOutletAccessory(platform, ain) {
         .on('get', this.getPowerUsage.bind(this))
     ;
 
+    this.services.Outlet.addCharacteristic(FritzPlatform.EnergyConsumption)
+        .on('get', this.getEnergyConsumption.bind(this))
+    ;
+
+    // TemperatureSensor
     this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.getCurrentTemperature.bind(this))
     ;
@@ -333,6 +351,10 @@ FritzOutletAccessory.prototype.update = function() {
 
             self.platform.fritz('getTemperature', self.ain).then(function(temp) {
                 self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+
+                self.platform.fritz('getSwitchEnergy', self.ain).then(function(energy) {
+                    self.services.Outlet.getCharacteristic(FritzPlatform.EnergyConsumption).setValue(energy / 1000.0, undefined, FritzPlatform.Context);
+                });                
             });
         });
     });
