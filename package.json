@@ -25,9 +25,10 @@
     "Siri"
   ],
   "dependencies": {
+    "bluebird": "^3.3.5",
+    "extend": "^3.0.0",
     "smartfritz-promise": "^0.6.1",
-    "valid-url": "^1.0.9",
-    "bluebird": "^3.3.5"
+    "valid-url": "^1.0.9"
   },
   "author": "Andreas Goetz <cpuidle@gmx.de>",
   "bugs": {
