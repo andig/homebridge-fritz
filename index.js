@@ -2,7 +2,7 @@
 //
 // @author Andreas Götz <cpuidle@gmx.de>
 
-/*jslint node: true */
+/* jslint node: true, laxcomma: true */
 "use strict";
 
 var fritz = require('smartfritz-promise');
@@ -266,7 +266,7 @@ FritzOutletAccessory.prototype.getOn = function(callback) {
 FritzOutletAccessory.prototype.setOn = function(on, callback, context) {
     if (context == FritzPlatform.Context)
         return;
-    
+
     this.platform.log("Switching outlet " + this.ain + " to " + on);
 
     var func = on ? 'setSwitchOn' : 'setSwitchOff';
@@ -336,7 +336,7 @@ function FritzThermostatAccessory(platform, ain) {
             .setCharacteristic(Characteristic.SerialNumber, this.ain)
         ,
         Thermostat: new Service.Thermostat(this.name)
-    }
+    };
 
     this.services.Thermostat.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
         .on('get', this.getCurrentHeatingCoolingState.bind(this))
