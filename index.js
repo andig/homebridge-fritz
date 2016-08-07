@@ -459,6 +459,27 @@ FritzThermostatAccessory.prototype.getTemperatureDisplayUnits = function(callbac
     callback(null, Characteristic.TemperatureDisplayUnits.CELSIUS);
 };
 
+FritzThermostatAccessory.prototype.getBatteryLevel = function(callback) {
+    this.platform.log("Getting thermostat " + this.ain + " battery level");
+
+    this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
+        callback(null, battery);
+    });
+};
+
+FritzThermostatAccessory.prototype.getChargingState = function(callback) {
+    callback(null, Characteristic.ChargingState.NOT_CHARGING);
+};
+
+FritzThermostatAccessory.prototype.getStatusLowBattery = function(callback) {
+    this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
+        callback(null, battery < 20 
+            ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+            : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+        );
+    });
+};
+
 FritzThermostatAccessory.prototype.update = function() {
     this.platform.log("Updating thermostat " + this.ain + " temperature");
 
