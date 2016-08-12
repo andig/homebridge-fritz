@@ -1,5 +1,6 @@
 # homebridge-fritz
 [![NPM Version](https://img.shields.io/npm/v/homebridge-fritz.svg)](https://www.npmjs.com/package/homebridge-fritz)
+[![Build status](https://travis-ci.org/andig/homebridge-fritz.svg?branch=master)](https://travis-ci.org/andig/homebridge-fritz)
 
 Homebridge platform plugin for FRITZ!Box.
 
