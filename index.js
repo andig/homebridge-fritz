@@ -100,6 +100,18 @@ FritzPlatform.prototype = {
                         accessories.push(new FritzThermostatAccessory(self, ain));
                     });
 
+                    // add remaining non-api devices
+                    devices.forEach(function(device) {
+                        var ain = device.identifier.replace(/\s/g, '');
+                        var unknown = !accessories.find(function(accessory) {
+                            return accessory.ain && accessory.ain == ain;
+                        });
+
+                        if (unknown && device.temperature) {
+                            accessories.push(new FritzTemperatureSensorAccessory(self, ain));
+                        }
+                    });
+
                     callback(accessories);
                 });
             });
@@ -499,5 +511,40 @@ FritzThermostatAccessory.prototype.update = function() {
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
         this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+    }.bind(this));
+};
+
+
+/**
+ * FritzTemperatureSensorAccessory
+ */
+
+function FritzTemperatureSensorAccessory(platform, ain) {
+    FritzAccessory.apply(this, arguments);
+
+    extend(this.services, {
+        TemperatureSensor: new Service.TemperatureSensor(this.name)
+    });
+
+    this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+        .on('get', this.getCurrentTemperature.bind(this))
+    ;
+
+    setInterval(this.update.bind(this), this.platform.interval);
+}
+
+FritzTemperatureSensorAccessory.prototype.getCurrentTemperature = function(callback) {
+    this.platform.log("Getting temperature sensor " + this.ain + " temperature");
+
+    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
+        callback(null, temp);
+    });
+};
+
+FritzTemperatureSensorAccessory.prototype.update = function() {
+    this.platform.log("Updating temperature sensor " + this.ain);
+
+    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
+        this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
     }.bind(this));
 };
