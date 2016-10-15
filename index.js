@@ -22,9 +22,6 @@ module.exports = function(homebridge) {
     homebridge.registerPlatform("homebridge-fritz", "Fritz!Box", FritzPlatform);
 };
 
-// inherit before assigning prototypes
-inherits(FritzOutletAccessory, FritzAccessory);
-inherits(FritzThermostatAccessory, FritzAccessory);
 
 
 /**
@@ -274,6 +271,8 @@ FritzAccessory.prototype.getServices = function() {
  * FritzOutletAccessory
  */
 
+inherits(FritzOutletAccessory, FritzAccessory);
+
 function FritzOutletAccessory(platform, ain) {
     FritzAccessory.apply(this, arguments);
 
@@ -393,6 +392,8 @@ FritzOutletAccessory.prototype.update = function() {
 /**
  * FritzThermostatAccessory
  */
+
+inherits(FritzThermostatAccessory, FritzAccessory);
 
 function FritzThermostatAccessory(platform, ain) {
     FritzAccessory.apply(this, arguments);
@@ -519,6 +520,8 @@ FritzThermostatAccessory.prototype.update = function() {
 /**
  * FritzTemperatureSensorAccessory
  */
+
+inherits(FritzTemperatureSensorAccessory, FritzAccessory);
 
 function FritzTemperatureSensorAccessory(platform, ain) {
     FritzAccessory.apply(this, arguments);
