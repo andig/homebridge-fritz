@@ -26,6 +26,7 @@ module.exports = function(homebridge) {
 inherits(FritzOutletAccessory, FritzAccessory);
 inherits(FritzThermostatAccessory, FritzAccessory);
 
+
 /**
  * FritzPlatform
  */
@@ -82,7 +83,7 @@ FritzPlatform.prototype = {
 
         this.fritz("getDeviceList").then(function(devices) {
             // cache list of devices in options for reuse by non-API functions
-            self.options.deviceList = devices;
+            self.deviceList = devices;
 
             // outlets
             self.fritz("getSwitchList").then(function(ains) {
@@ -122,7 +123,7 @@ FritzPlatform.prototype = {
     },
 
     getDevice: function(ain) {
-        var device = this.options.deviceList.find(function(device) {
+        var device = this.deviceList.find(function(device) {
             return device.identifier.replace(/\s/g, '') == ain;
         });
         return device || {}; // safeguard
