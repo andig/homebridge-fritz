@@ -9,7 +9,8 @@ Homebridge platform plugin for FRITZ!Box.
 This plugin exposes:
 
   - Wlan guest access switch
-  - Fritz!DECT outlets
+  - Fritz!DECT outlets (100, 200, 210)
+  - Fritz!Powerline outlets (510, 540)
   - Comet!DECT thermostats
 
 

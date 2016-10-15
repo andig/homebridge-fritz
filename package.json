@@ -1,20 +1,9 @@
 {
   "name": "homebridge-fritz",
-  "version": "0.2.5",
+  "version": "0.3.0",
+  "author": "Andreas Goetz <cpuidle@gmx.de>",
+  "homepage": "https://github.com/andig/homebridge-fritz#readme",
   "description": "Homebridge platform plugin for Fritz!Box",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\""
-  },
-  "engines": {
-    "node": ">4.0.0",
-    "homebridge": ">=0.3.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/andig/homebridge-fritz.git"
-  },
   "keywords": [
     "homebridge-plugin",
     "homebridge",
@@ -24,15 +13,29 @@
     "homekit",
     "Siri"
   ],
-  "dependencies": {
-    "bluebird": "^3.3.5",
-    "extend": "^3.0.0",
-    "smartfritz-promise": "^0.6.1",
-    "valid-url": "^1.0.9"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andig/homebridge-fritz.git"
   },
-  "author": "Andreas Goetz <cpuidle@gmx.de>",
   "bugs": {
     "url": "https://github.com/andig/homebridge-fritz/issues"
   },
-  "homepage": "https://github.com/andig/homebridge-fritz#readme"
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/jshint/bin/jshint index.js"
+  },
+  "engines": {
+    "node": ">4.0.0",
+    "homebridge": ">=0.3.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.5",
+    "extend": "^3.0.0",
+    "fritzapi": "^0.8.0",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "jshint": "^2.9.2"
+  }
 }
