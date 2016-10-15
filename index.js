@@ -5,7 +5,7 @@
 /* jslint node: true, laxcomma: true */
 "use strict";
 
-var fritz = require('smartfritz-promise');
+var fritz = require('fritzapi');
 var promise = require('bluebird');
 var isWebUri = require('valid-url').isWebUri;
 var inherits = require('util').inherits;
