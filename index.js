@@ -151,6 +151,14 @@ FritzPlatform.prototype = {
 
                             funcArgs = [self.sid].concat(args).concat(self.options);
                             return fritzFunc.apply(self, funcArgs);
+                        })
+                        .catch(function(error) {
+                            if (error === "0000000000000000") {
+                                self.log.warn("Fritz!Box platform login failed");
+                                throw "Invalid session id";
+                            }
+
+                            throw error;
                         });
                     }
 
