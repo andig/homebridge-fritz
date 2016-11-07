@@ -416,6 +416,7 @@ function FritzThermostatAccessory(platform, ain) {
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.TargetHeatingCoolingState)
         .on('get', this.getTargetHeatingCoolingState.bind(this))
+        .on('set', this.setTargetHeatingCoolingState.bind(this))
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.getCurrentTemperature.bind(this))
@@ -454,7 +455,43 @@ FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(call
 };
 
 FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callback) {
-    callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+    this.platform.log("Getting thermostat " + this.ain + " target heating state");
+
+    this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
+        if (temp == 'off')
+            callback(null, Characteristic.TargetHeatingCoolingState.OFF);
+        if (temp == 'on')
+            callback(null, Characteristic.TargetHeatingCoolingState.HEAT);
+        else
+            callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+    });
+};
+
+FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state, callback, context) {
+    if (context == FritzPlatform.Context)
+        return;
+
+    this.platform.log("Setting thermostat " + this.ain + " heating state");
+
+    var temp;
+    switch (state) {
+        case Characteristic.TargetHeatingCoolingState.OFF:
+        case Characteristic.TargetHeatingCoolingState.COOL:
+            temp = 'off';
+            break;
+        case Characteristic.TargetHeatingCoolingState.HEAT:
+            temp = 'on';
+            break;
+        case Characteristic.TargetHeatingCoolingState.AUTO:
+            this.platform.log("Heating state 'auto' not supported");
+            break;
+    }
+
+    if (temp !== null) {
+        this.platform.fritz('setTempTarget', this.ain, temp).then(function(temp) {
+            callback(null, state);
+        });
+    }
 };
 
 FritzThermostatAccessory.prototype.getCurrentTemperature = function(callback) {
