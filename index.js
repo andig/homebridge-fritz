@@ -455,7 +455,16 @@ FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(call
 };
 
 FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callback) {
-    callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+    this.platform.log("Getting thermostat " + this.ain + " target heating state");
+
+    this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
+        if (temp == 'off')
+            callback(null, Characteristic.TargetHeatingCoolingState.OFF);
+        if (temp == 'on')
+            callback(null, Characteristic.TargetHeatingCoolingState.HEAT);
+        else
+            callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+    });
 };
 
 FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state, callback, context) {
@@ -466,7 +475,6 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
 
     var temp;
     switch (state) {
-        // Characteristic.TargetHeatingCoolingState.AUTO not supported
         case Characteristic.TargetHeatingCoolingState.OFF:
         case Characteristic.TargetHeatingCoolingState.COOL:
             temp = 'off';
@@ -474,11 +482,14 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
         case Characteristic.TargetHeatingCoolingState.HEAT:
             temp = 'on';
             break;
+        case Characteristic.TargetHeatingCoolingState.AUTO:
+            this.platform.log("Heating state 'auto' not supported");
+            break;
     }
 
-    if (temp !== null) {     
+    if (temp !== null) {
         this.platform.fritz('setTempTarget', this.ain, temp).then(function(temp) {
-            callback(null, temp);
+            callback(null, state);
         });
     }
 };
