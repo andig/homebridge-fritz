@@ -53,6 +53,18 @@ The `url`, `interval` and `debug` settings are optional:
   - `debug`: if true the smartfritz API calls are logged
 
 
+## Common Issues / Frequently Asked Questions
+
+  1. homebridge-fritz can't login to the FritzBox
+  
+    Some users have reported that logging into the FritzBox internally via `https` fails. This seems to be caused by the FritzApp *occupying* the same port.
+    In this case you can connect internally via `http` or use the external IP.
+  
+  2. homebridge-fritz is not able to update my thermostat
+  
+    Current FritzBox firmwares seem to ignore API updates when the thermostat has been key-locked. 
+    No workaround available- please contact AVM to change this behaviour or don't use the locking mechanism.
+
 ## Acknowledgements
 
   - Original non-working fritz accessory https://github.com/tommasomarchionni/homebridge-FRITZBox
