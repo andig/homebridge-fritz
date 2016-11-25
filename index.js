@@ -70,52 +70,62 @@ FritzPlatform.EnergyConsumption = function() {
 
 FritzPlatform.prototype = {
     accessories: function(callback) {
-        this.log("Discovering accessories");
-
         var accessories = [];
         var self = this;
 
-        // wifi
-        accessories.push(new FritzWifiAccessory(this));
+        fritz.getSessionID(this.config.username, this.config.password, this.options).then(function(sid) {
+            self.log("Fritz!Box platform login successful");
+            self.sid = sid;
+        })
+        .then(function() {
+            self.log("Discovering accessories");
 
-        this.fritz("getDeviceList").then(function(devices) {
-            // cache list of devices in options for reuse by non-API functions
-            self.deviceList = devices;
+            // wifi
+            accessories.push(new FritzWifiAccessory(self));
 
-            // outlets
-            self.fritz("getSwitchList").then(function(ains) {
-                self.log("Outlets found: %s", ains.toString());
+            self.fritz("getDeviceList").then(function(devices) {
+                // cache list of devices in options for reuse by non-API functions
+                self.deviceList = devices;
 
-                ains.forEach(function(ain) {
-                    accessories.push(new FritzOutletAccessory(self, ain));
-                });
-
-                // thermostats
-                self.fritz('getThermostatList').then(function(ains) {
-                    self.log("Thermostats found: %s", ains.toString());
+                // outlets
+                self.fritz("getSwitchList").then(function(ains) {
+                    self.log("Outlets found: %s", ains.toString());
 
                     ains.forEach(function(ain) {
-                        accessories.push(new FritzThermostatAccessory(self, ain));
+                        accessories.push(new FritzOutletAccessory(self, ain));
                     });
 
-                    // add remaining non-api devices
-                    var sensors = [];
-                    devices.forEach(function(device) {
-                        var ain = device.identifier.replace(/\s/g, '');
-                        var unknown = !accessories.find(function(accessory) {
-                            return accessory.ain && accessory.ain == ain;
+                    // thermostats
+                    self.fritz('getThermostatList').then(function(ains) {
+                        self.log("Thermostats found: %s", ains.toString());
+
+                        ains.forEach(function(ain) {
+                            accessories.push(new FritzThermostatAccessory(self, ain));
                         });
 
-                        if (unknown && device.temperature) {
-                            sensors.push(ain);
-                            accessories.push(new FritzTemperatureSensorAccessory(self, ain));
-                        }
-                    });
-                    self.log("Sensors found: %s", sensors.toString());
+                        // add remaining non-api devices
+                        var sensors = [];
+                        devices.forEach(function(device) {
+                            var ain = device.identifier.replace(/\s/g, '');
+                            var unknown = !accessories.find(function(accessory) {
+                                return accessory.ain && accessory.ain == ain;
+                            });
 
-                    callback(accessories);
+                            if (unknown && device.temperature) {
+                                sensors.push(ain);
+                                accessories.push(new FritzTemperatureSensorAccessory(self, ain));
+                            }
+                        });
+                        self.log("Sensors found: %s", sensors.toString());
+
+                        callback(accessories);
+                    });
                 });
             });
+        })
+        .catch(function(error) {
+            self.log.debug(error);
+            self.log.error("Fritz!Box platform login failed");
         });
     },
 
@@ -140,20 +150,19 @@ FritzPlatform.prototype = {
                 var fritzFunc = fritz[func];
                 var funcArgs = [self.sid].concat(args).concat(self.options);
 
-                if (self.config.debug)
-                    self.log.debug("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
+                self.log.debug("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
 
                 return fritzFunc.apply(self, funcArgs).catch(function(error) {
                     if (error.response && error.response.statusCode == 403) {
                         return fritz.getSessionID(self.config.username, self.config.password, self.options).then(function(sid) {
-                            self.log("Fritz!Box platform login successful");
+                            self.log("Fritz!Box session renewed");
                             self.sid = sid;
 
                             funcArgs = [self.sid].concat(args).concat(self.options);
                             return fritzFunc.apply(self, funcArgs);
                         })
                         .catch(function(error) {
-                            self.log.warn("Fritz!Box platform login failed");
+                            self.log.warn("Fritz!Box session renewal failed");
                             /* jshint laxbreak:true */
                             throw error === "0000000000000000" 
                                 ? "Invalid session id" 
@@ -165,22 +174,19 @@ FritzPlatform.prototype = {
                 });
             })
             .catch(function(error) {
-                self.log.warn("> %s failed - retrying in 3 seconds", func);
-                self.log.warn(error);
+                self.log.debug(error);
+                self.log.error("< %s failed", func);
+                self.promise = null;
 
-                return promise.delay(3000).then(function() {
-                    self.promise = null;
-                    return self.fritz.apply(self, [func].concat(args));
-                });
+                return promise.reject(func + " failed");
             })
         ;
 
-        if (this.config.debug) {
-            this.promise.then(function(res) {
-                self.log.debug("> %s %s", func, JSON.stringify(res));
-                return res;
-            });
-        }
+        // debug result
+        this.promise.then(function(res) {
+            self.log.debug("< %s %s", func, JSON.stringify(res));
+            return res;
+        });
 
         return this.promise;
     }
