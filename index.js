@@ -307,7 +307,7 @@ FritzAccessory.prototype.getCurrentTemperature = function(callback) {
 inherits(FritzOutletAccessory, FritzAccessory);
 
 function FritzOutletAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments.concat("outlet"));
+    FritzAccessory.apply(this, Array.from(arguments).concat("outlet"));
 
     extend(this.services, {
         Outlet: new Service.Outlet(this.name)
@@ -426,7 +426,7 @@ FritzOutletAccessory.prototype.update = function() {
 inherits(FritzThermostatAccessory, FritzAccessory);
 
 function FritzThermostatAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments.concat("thermostat"));
+    FritzAccessory.apply(this, Array.from(arguments).concat("thermostat"));
 
     extend(this.services, {
         Thermostat: new Service.Thermostat(this.name),
@@ -597,7 +597,7 @@ FritzThermostatAccessory.prototype.update = function() {
 inherits(FritzTemperatureSensorAccessory, FritzAccessory);
 
 function FritzTemperatureSensorAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments.concat("temperature sensor"));
+    FritzAccessory.apply(this, Array.from(arguments).concat("temperature sensor"));
 
     extend(this.services, {
         TemperatureSensor: new Service.TemperatureSensor(this.name)
