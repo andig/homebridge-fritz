@@ -382,12 +382,11 @@ FritzOutletAccessory.prototype.getEnergyConsumption = function(callback) {
 
 FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-    var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.clamp(self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
+        this.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
         callback(null, temp);
-    });
+    }.bind(this));
 };
 
 FritzOutletAccessory.prototype.update = function() {
@@ -623,20 +622,18 @@ function FritzTemperatureSensorAccessory(platform, ain) {
 
 FritzTemperatureSensorAccessory.prototype.getCurrentTemperature = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-    var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
+        this.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
         callback(null, temp);
-    });
+    }.bind(this));
 };
 
 FritzTemperatureSensorAccessory.prototype.update = function() {
     this.platform.log(`Updating ${this.type} ${this.ain}`);
-    var self = this;
 
     // TemperatureSensor
     this.getCurrentTemperature(function(foo, temp) {
-        self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
-    });
+        this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+    }.bind(this));
 };
