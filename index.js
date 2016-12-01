@@ -520,12 +520,11 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
 
 FritzThermostatAccessory.prototype.getCurrentTemperature = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-    var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.clamp(this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature), temp);
+        this.clamp(this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature), temp);
         callback(null, temp);
-    });
+    }.bind(this));
 };
 
 FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
