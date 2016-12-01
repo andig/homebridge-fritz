@@ -385,7 +385,7 @@ FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
     var self = this;
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        self.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
+        self.clamp(self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
         callback(null, temp);
     });
 };
