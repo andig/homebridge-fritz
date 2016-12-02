@@ -1,8 +1,12 @@
-// Fritz!Box Platform Plugin for HomeBridge (https://github.com/nfarina/homebridge)
-//
-// @author Andreas Götz <cpuidle@gmx.de>
+/**
+ * Fritz!Box Platform Plugin for HomeBridge (https://github.com/nfarina/homebridge)
+ *
+ * @url https://github.com/andig/homebridge-fritz
+ * @author Andreas Götz <cpuidle@gmx.de>
+ * @license MIT
+ */
 
-/* jslint node: true, laxcomma: true */
+/* jslint node: true, laxcomma: true, esversion: 6 */
 "use strict";
 
 var fritz = require('fritzapi');
@@ -164,8 +168,8 @@ FritzPlatform.prototype = {
                         .catch(function(error) {
                             self.log.warn("Fritz!Box session renewal failed");
                             /* jshint laxbreak:true */
-                            throw error === "0000000000000000" 
-                                ? "Invalid session id" 
+                            throw error === "0000000000000000"
+                                ? "Invalid session id"
                                 : error;
                         });
                     }
@@ -248,9 +252,10 @@ FritzWifiAccessory.prototype.update = function() {
  * FritzAccessory
  */
 
-function FritzAccessory(platform, ain) {
+function FritzAccessory(platform, ain, type) {
     this.platform = platform;
     this.ain = ain;
+    this.type = type;
     this.name = this.platform.getName(this.ain);
     this.device = this.platform.getDevice(this.ain);
 
@@ -280,6 +285,14 @@ FritzAccessory.prototype.getServices = function() {
     }.bind(this));
 };
 
+FritzAccessory.prototype.getCurrentTemperature = function(callback) {
+    this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
+
+    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
+        callback(null, temp);
+    }.bind(this));
+};
+
 
 /**
  * FritzOutletAccessory
@@ -288,7 +301,7 @@ FritzAccessory.prototype.getServices = function() {
 inherits(FritzOutletAccessory, FritzAccessory);
 
 function FritzOutletAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments);
+    FritzAccessory.apply(this, Array.from(arguments).concat("outlet"));
 
     extend(this.services, {
         Outlet: new Service.Outlet(this.name)
@@ -319,6 +332,7 @@ function FritzOutletAccessory(platform, ain) {
         });
 
         this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+            .setProps({minValue: -50})
             .on('get', this.getCurrentTemperature.bind(this))
         ;
     }
@@ -327,7 +341,7 @@ function FritzOutletAccessory(platform, ain) {
 }
 
 FritzOutletAccessory.prototype.getOn = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " state");
+    this.platform.log(`Getting ${this.type} ${this.ain} state`);
 
     this.platform.fritz('getSwitchState', this.ain).then(function(state) {
         callback(null, state);
@@ -338,7 +352,7 @@ FritzOutletAccessory.prototype.setOn = function(on, callback, context) {
     if (context == FritzPlatform.Context)
         return;
 
-    this.platform.log("Switching outlet " + this.ain + " to " + on);
+    this.platform.log(`Switching ${this.type} ${this.ain} to ` + on);
 
     var func = on ? 'setSwitchOn' : 'setSwitchOff';
     this.platform.fritz(func, this.ain).then(function(state) {
@@ -347,7 +361,7 @@ FritzOutletAccessory.prototype.setOn = function(on, callback, context) {
 };
 
 FritzOutletAccessory.prototype.getInUse = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " in use");
+    this.platform.log(`Getting ${this.type} ${this.ain} in use`);
 
     this.platform.fritz('getSwitchPower', this.ain).then(function(power) {
         callback(null, power > 0);
@@ -355,7 +369,7 @@ FritzOutletAccessory.prototype.getInUse = function(callback) {
 };
 
 FritzOutletAccessory.prototype.getPowerUsage = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " power usage");
+    this.platform.log(`Getting ${this.type} ${this.ain} power usage`);
 
     this.platform.fritz('getSwitchPower', this.ain).then(function(power) {
         callback(null, power);
@@ -363,23 +377,15 @@ FritzOutletAccessory.prototype.getPowerUsage = function(callback) {
 };
 
 FritzOutletAccessory.prototype.getEnergyConsumption = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " energy consumption");
+    this.platform.log(`Getting ${this.type} ${this.ain} energy consumption`);
 
     this.platform.fritz('getSwitchEnergy', this.ain).then(function(energy) {
         callback(null, energy / 1000.0);
     });
 };
 
-FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log("Getting outlet " + this.ain + " temperature");
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        callback(null, temp);
-    });
-};
-
 FritzOutletAccessory.prototype.update = function() {
-    this.platform.log("Updating outlet " + this.ain);
+    this.platform.log(`Updating ${this.type} ${this.ain}`);
     var self = this;
 
     // Outlet
@@ -415,7 +421,7 @@ FritzOutletAccessory.prototype.update = function() {
 inherits(FritzThermostatAccessory, FritzAccessory);
 
 function FritzThermostatAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments);
+    FritzAccessory.apply(this, Array.from(arguments).concat("thermostat"));
 
     extend(this.services, {
         Thermostat: new Service.Thermostat(this.name),
@@ -431,6 +437,7 @@ function FritzThermostatAccessory(platform, ain) {
         .on('set', this.setTargetHeatingCoolingState.bind(this))
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature)
+        .setProps({minValue: -50})
         .on('get', this.getCurrentTemperature.bind(this))
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature)
@@ -456,7 +463,7 @@ function FritzThermostatAccessory(platform, ain) {
 }
 
 FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " heating state");
+    this.platform.log(`Getting ${this.type} ${this.ain} heating state`);
 
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
         if (temp == 'off')
@@ -467,7 +474,8 @@ FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(call
 };
 
 FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " target heating state");
+    this.platform.log(`Getting ${this.type} ${this.ain} target heating state`);
+    var self = this;
 
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
         if (temp == 'off')
@@ -483,7 +491,7 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
     if (context == FritzPlatform.Context)
         return;
 
-    this.platform.log("Setting thermostat " + this.ain + " heating state");
+    this.platform.log(`Setting ${this.type} ${this.ain} heating state`);
 
     var temp;
     switch (state) {
@@ -506,16 +514,8 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
     }
 };
 
-FritzThermostatAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " temperature");
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        callback(null, temp);
-    });
-};
-
 FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " target temperature");
+    this.platform.log(`Getting ${this.type} ${this.ain} target temperature`);
 
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
         if (temp == 'off')
@@ -531,7 +531,7 @@ FritzThermostatAccessory.prototype.setTargetTemperature = function(temp, callbac
     if (context == FritzPlatform.Context)
         return;
 
-    this.platform.log("Setting thermostat " + this.ain + " target temperature");
+    this.platform.log(`Setting ${this.type} ${this.ain} target temperature`);
 
     this.platform.fritz('setTempTarget', this.ain, temp).then(function(temp) {
         callback(null, temp);
@@ -543,7 +543,7 @@ FritzThermostatAccessory.prototype.getTemperatureDisplayUnits = function(callbac
 };
 
 FritzThermostatAccessory.prototype.getBatteryLevel = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " battery level");
+    this.platform.log(`Getting ${this.type} ${this.ain} battery level`);
 
     this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
         callback(null, battery);
@@ -551,11 +551,11 @@ FritzThermostatAccessory.prototype.getBatteryLevel = function(callback) {
 };
 
 FritzThermostatAccessory.prototype.getChargingState = function(callback) {
-    callback(null, Characteristic.ChargingState.NOT_CHARGING);
+    callback(null, Characteristic.ChargingState.NOT_CHARGEABLE);
 };
 
 FritzThermostatAccessory.prototype.getStatusLowBattery = function(callback) {
-    this.platform.log("Getting thermostat " + this.ain + " battery status");
+    this.platform.log(`Getting ${this.type} ${this.ain} battery status`);
 
     this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
         /* jshint laxbreak:true */
@@ -567,7 +567,7 @@ FritzThermostatAccessory.prototype.getStatusLowBattery = function(callback) {
 };
 
 FritzThermostatAccessory.prototype.update = function() {
-    this.platform.log("Updating thermostat " + this.ain);
+    this.platform.log(`Updating ${this.type} ${this.ain}`);
     var self = this;
 
     // Thermostat
@@ -593,33 +593,25 @@ FritzThermostatAccessory.prototype.update = function() {
 inherits(FritzTemperatureSensorAccessory, FritzAccessory);
 
 function FritzTemperatureSensorAccessory(platform, ain) {
-    FritzAccessory.apply(this, arguments);
+    FritzAccessory.apply(this, Array.from(arguments).concat("temperature sensor"));
 
     extend(this.services, {
         TemperatureSensor: new Service.TemperatureSensor(this.name)
     });
 
     this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+        .setProps({minValue: -50})
         .on('get', this.getCurrentTemperature.bind(this))
     ;
 
     setInterval(this.update.bind(this), this.platform.interval);
 }
 
-FritzTemperatureSensorAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log("Getting temperature sensor " + this.ain + " temperature");
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        callback(null, temp);
-    });
-};
-
 FritzTemperatureSensorAccessory.prototype.update = function() {
-    this.platform.log("Updating temperature sensor " + this.ain);
-    var self = this;
+    this.platform.log(`Updating ${this.type} ${this.ain}`);
 
     // TemperatureSensor
     this.getCurrentTemperature(function(foo, temp) {
-        self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
-    });
+        this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+    }.bind(this));
 };
