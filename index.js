@@ -285,9 +285,12 @@ FritzAccessory.prototype.getServices = function() {
     }.bind(this));
 };
 
-FritzAccessory.prototype.clamp = function(characteristic, val) {
-    characteristic.props.minValue = Math.min(characteristic.props.minValue, val);
-    characteristic.props.maxValue = Math.max(characteristic.props.maxValue, val);
+FritzAccessory.prototype.getCurrentTemperature = function(callback) {
+    this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
+
+    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
+        callback(null, temp);
+    }.bind(this));
 };
 
 
@@ -329,6 +332,7 @@ function FritzOutletAccessory(platform, ain) {
         });
 
         this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+            .setProps({minValue: -50})
             .on('get', this.getCurrentTemperature.bind(this))
         ;
     }
@@ -378,15 +382,6 @@ FritzOutletAccessory.prototype.getEnergyConsumption = function(callback) {
     this.platform.fritz('getSwitchEnergy', this.ain).then(function(energy) {
         callback(null, energy / 1000.0);
     });
-};
-
-FritzOutletAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        this.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
-        callback(null, temp);
-    }.bind(this));
 };
 
 FritzOutletAccessory.prototype.update = function() {
@@ -442,6 +437,7 @@ function FritzThermostatAccessory(platform, ain) {
         .on('set', this.setTargetHeatingCoolingState.bind(this))
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature)
+        .setProps({minValue: -50})
         .on('get', this.getCurrentTemperature.bind(this))
     ;
     this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature)
@@ -516,15 +512,6 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
             callback(null, state);
         });
     }
-};
-
-FritzThermostatAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        this.clamp(this.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature), temp);
-        callback(null, temp);
-    }.bind(this));
 };
 
 FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
@@ -613,20 +600,12 @@ function FritzTemperatureSensorAccessory(platform, ain) {
     });
 
     this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature)
+        .setProps({minValue: -50})
         .on('get', this.getCurrentTemperature.bind(this))
     ;
 
     setInterval(this.update.bind(this), this.platform.interval);
 }
-
-FritzTemperatureSensorAccessory.prototype.getCurrentTemperature = function(callback) {
-    this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
-
-    this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        this.clamp(this.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature), temp);
-        callback(null, temp);
-    }.bind(this));
-};
 
 FritzTemperatureSensorAccessory.prototype.update = function() {
     this.platform.log(`Updating ${this.type} ${this.ain}`);
