@@ -551,7 +551,7 @@ FritzThermostatAccessory.prototype.getBatteryLevel = function(callback) {
 };
 
 FritzThermostatAccessory.prototype.getChargingState = function(callback) {
-    callback(null, Characteristic.ChargingState.NOT_CHARGING);
+    callback(null, Characteristic.ChargingState.NOT_CHARGEABLE);
 };
 
 FritzThermostatAccessory.prototype.getStatusLowBattery = function(callback) {
