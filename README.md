@@ -67,9 +67,9 @@ To enable debugging run homebridge with `-D` option:
 
     `Fritz!Box platform login failed` messages can be caused by invalid login data or wrong url.
 
-    Log messages if the form of
+    Log messages if the form of:
 
-      { error: { [Error: self signed certificate] code: 'DEPTH_ZERO_SELF_SIGNED_CERT' }
+        { error: { [Error: self signed certificate] code: 'DEPTH_ZERO_SELF_SIGNED_CERT' }
 
     indicate that there are SSL security problems- most likely due to self-signed certificates. Use the `"strictSSL": false` option to disable the respective check.
 
