@@ -201,9 +201,17 @@ function FritzWifiAccessory(platform) {
     this.platform = platform;
     this.name = "Guest WLAN";
 
-    this.service = new Service.Switch(this.name);
+    this.services = {
+        AccessoryInformation: new Service.AccessoryInformation(),
+        Switch: new Service.Switch(this.name)
+    };
 
-    this.service.getCharacteristic(Characteristic.On)
+    this.services.AccessoryInformation
+        .setCharacteristic(Characteristic.Manufacturer, "AVM");
+    this.services.AccessoryInformation
+        .setCharacteristic(Characteristic.Model, "FritzBox");
+
+    this.services.Switch.getCharacteristic(Characteristic.On)
         .on('get', this.getOn.bind(this))
         .on('set', this.setOn.bind(this))
     ;
@@ -212,7 +220,7 @@ function FritzWifiAccessory(platform) {
 }
 
 FritzWifiAccessory.prototype.getServices = function() {
-    return [this.service];
+    return [this.services.AccessoryInformation, this.services.Switch];
 };
 
 FritzWifiAccessory.prototype.getOn = function(callback) {
@@ -238,7 +246,7 @@ FritzWifiAccessory.prototype.update = function() {
     this.platform.log("Updating guest WLAN");
 
     this.platform.fritz('getGuestWlan').then(function(res) {
-        this.service.getCharacteristic(Characteristic.On).setValue(res.activate_guest_access, undefined, FritzPlatform.Context);
+        this.services.Switch.getCharacteristic(Characteristic.On).setValue(res.activate_guest_access, undefined, FritzPlatform.Context);
     }.bind(this));
 };
 
