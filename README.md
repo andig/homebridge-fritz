@@ -9,9 +9,10 @@ Homebridge platform plugin for FRITZ!Box.
 This plugin exposes:
 
   - Wlan guest access switch
-  - Fritz!DECT outlets (100, 200, 210)
+  - Fritz!DECT outlets (200, 210)
   - Fritz!Powerline outlets (510, 540)
-  - Comet!DECT thermostats
+  - Fritz!DECT (300) and Comet!DECT thermostats
+  - Fritz!DECT repeaters as temperature sensor (100)
 
 
 ## Installation
@@ -88,5 +89,6 @@ To enable debugging run homebridge with `-D` option:
 
 ## Acknowledgements
 
+  - homebridge-fritz is based on the [fritzapi](https://github.com/andig/fritzapi) library
   - Original non-working fritz accessory https://github.com/tommasomarchionni/homebridge-FRITZBox
   - Platform implementation inspired by https://github.com/rudders/homebridge-platform-wemo.
