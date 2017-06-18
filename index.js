@@ -38,6 +38,7 @@ function FritzPlatform(log, config) {
 
     this.options = this.config.options || {};
     this.options.url = this.config.url || 'http://fritz.box';
+    this.options.no_accessories = this.config.no_accessories || false;
     this.interval = 1000 * (this.config.interval || 60);  // 1 minute
 
     // fritz url
@@ -87,45 +88,50 @@ FritzPlatform.prototype = {
             // wifi
             accessories.push(new FritzWifiAccessory(self));
 
-            self.fritz("getDeviceList").then(function(devices) {
-                // cache list of devices in options for reuse by non-API functions
-                self.deviceList = devices;
+            if (self.options.no_accessories !== true )
+            {
+                self.fritz("getDeviceList").then(function(devices) {
+                    // cache list of devices in options for reuse by non-API functions
+                    self.deviceList = devices;
 
-                // outlets
-                self.fritz("getSwitchList").then(function(ains) {
-                    self.log("Outlets found: %s", ains.toString());
-
-                    ains.forEach(function(ain) {
-                        accessories.push(new FritzOutletAccessory(self, ain));
-                    });
-
-                    // thermostats
-                    self.fritz('getThermostatList').then(function(ains) {
-                        self.log("Thermostats found: %s", ains.toString());
+                    // outlets
+                    self.fritz("getSwitchList").then(function(ains) {
+                        self.log("Outlets found: %s", ains.toString());
 
                         ains.forEach(function(ain) {
-                            accessories.push(new FritzThermostatAccessory(self, ain));
+                            accessories.push(new FritzOutletAccessory(self, ain));
                         });
 
-                        // add remaining non-api devices
-                        var sensors = [];
-                        devices.forEach(function(device) {
-                            var ain = device.identifier.replace(/\s/g, '');
-                            var unknown = !accessories.find(function(accessory) {
-                                return accessory.ain && accessory.ain == ain;
+                        // thermostats
+                        self.fritz('getThermostatList').then(function(ains) {
+                            self.log("Thermostats found: %s", ains.toString());
+
+                            ains.forEach(function(ain) {
+                                accessories.push(new FritzThermostatAccessory(self, ain));
                             });
 
-                            if (unknown && device.temperature) {
-                                sensors.push(ain);
-                                accessories.push(new FritzTemperatureSensorAccessory(self, ain));
-                            }
-                        });
-                        self.log("Sensors found: %s", sensors.toString());
+                            // add remaining non-api devices
+                            var sensors = [];
+                            devices.forEach(function(device) {
+                                var ain = device.identifier.replace(/\s/g, '');
+                                var unknown = !accessories.find(function(accessory) {
+                                    return accessory.ain && accessory.ain == ain;
+                                });
 
-                        callback(accessories);
+                                if (unknown && device.temperature) {
+                                    sensors.push(ain);
+                                    accessories.push(new FritzTemperatureSensorAccessory(self, ain));
+                                }
+                            });
+                            self.log("Sensors found: %s", sensors.toString());
+
+                            callback(accessories);
+                        });
                     });
                 });
-            });
+            } else {
+                callback(accessories);
+            }
         })
         .catch(function(error) {
             self.log.debug(error);
