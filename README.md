@@ -40,6 +40,7 @@ Add platform to `config.json`, for configuration see below.
       "password": "<password>",
       "url": "http://fritz.box",
       "interval": 60,
+      "no_accessories": false,
       "options": {
         "strictSSL": false
       }
@@ -53,6 +54,7 @@ The `url` and `interval` settings are optional:
 
   - `url`: Fritz!Box address
   - `interval`: polling interval for updating accessories if state was changed outside homebringe
+  - `no_accessories`: disable the use of accessories at all (e.g. if your FritzBox does not support it
 
 To enable debugging run homebridge with `-D` option:
 
