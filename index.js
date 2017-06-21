@@ -37,12 +37,15 @@ function FritzPlatform(log, config) {
     this.config = config;
 
     this.options = this.config.options || {};
-    this.options.url = this.config.url || 'http://fritz.box';
     this.interval = 1000 * (this.config.interval || 60);  // 1 minute
 
     // fritz url
-    if (!isWebUri(this.options.url)) this.log.warn("Invalid Fritz!Box url - forgot http(s)://?");
-
+    var url = this.config.url || 'http://fritz.box';
+    if (!isWebUri(url)) this.log.warn("Invalid Fritz!Box url - forgot http(s)://?");
+    // trailing slash
+    if (url.substr(-1) == "/") url = url.slice(0, -1);
+    this.options.url = url;
+        
     this.promise = null;
 }
 
