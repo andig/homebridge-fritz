@@ -128,6 +128,10 @@ FritzPlatform.prototype = {
                         callback(accessories);
                     });
                 });
+            })
+            .catch(function(error) {
+                self.log.error("Could not get device list from Fritz!Box. Please check if device supports the smart home API and user has sufficient privileges.");
+                callback(accessories);
             });
         })
         .catch(function(error) {
