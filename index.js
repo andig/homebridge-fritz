@@ -495,7 +495,7 @@ FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callb
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
         if (temp == 'off')
             callback(null, Characteristic.TargetHeatingCoolingState.OFF);
-        if (temp == 'on')
+        else if (temp == 'on')
             callback(null, Characteristic.TargetHeatingCoolingState.HEAT);
         else
             callback(null, Characteristic.TargetHeatingCoolingState.AUTO);

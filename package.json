@@ -1,6 +1,6 @@
 {
   "name": "homebridge-fritz",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "author": "Andreas Goetz <cpuidle@gmx.de>",
   "homepage": "https://github.com/andig/homebridge-fritz#readme",
   "description": "Homebridge platform plugin for Fritz!Box",
