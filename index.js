@@ -110,7 +110,7 @@ FritzPlatform.prototype = {
                             accessories.push(new FritzThermostatAccessory(self, ain));
                         });
 
-                        // add remaining non-api devices
+                        // add remaining non-api devices that support temperature, e.g. Fritz!DECT 100 repeater
                         var sensors = [];
                         devices.forEach(function(device) {
                             var ain = device.identifier.replace(/\s/g, '');
