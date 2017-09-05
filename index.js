@@ -39,6 +39,9 @@ function FritzPlatform(log, config) {
     this.options = this.config.options || {};
     this.interval = 1000 * (this.config.interval || 60);  // 1 minute
 
+    // array of hidden devices
+    if (!Array.isArray(this.config.hide)) this.config.hide = [];
+
     // fritz url
     var url = this.config.url || 'http://fritz.box';
     if (!isWebUri(url)) this.log.warn("Invalid Fritz!Box url - forgot http(s)://?");
@@ -88,7 +91,9 @@ FritzPlatform.prototype = {
             self.log("Discovering accessories");
 
             // wifi
-            accessories.push(new FritzWifiAccessory(self));
+            if (self.config.hide.indexOf("wifi") == -1) {
+                accessories.push(new FritzWifiAccessory(self));
+            }
 
             self.fritz("getDeviceList").then(function(devices) {
                 // cache list of devices in options for reuse by non-API functions
@@ -99,7 +104,9 @@ FritzPlatform.prototype = {
                     self.log("Outlets found: %s", ains.toString());
 
                     ains.forEach(function(ain) {
-                        accessories.push(new FritzOutletAccessory(self, ain));
+                        if (self.config.hide.indexOf(ain) == -1) {
+                            accessories.push(new FritzOutletAccessory(self, ain));
+                        }
                     });
 
                     // thermostats
@@ -107,20 +114,24 @@ FritzPlatform.prototype = {
                         self.log("Thermostats found: %s", ains.toString());
 
                         ains.forEach(function(ain) {
-                            accessories.push(new FritzThermostatAccessory(self, ain));
+                            if (self.config.hide.indexOf(ain) == -1) {
+                                accessories.push(new FritzThermostatAccessory(self, ain));
+                            }
                         });
 
                         // add remaining non-api devices that support temperature, e.g. Fritz!DECT 100 repeater
                         var sensors = [];
                         devices.forEach(function(device) {
-                            var ain = device.identifier.replace(/\s/g, '');
-                            var unknown = !accessories.find(function(accessory) {
-                                return accessory.ain && accessory.ain == ain;
-                            });
-
-                            if (unknown && device.temperature) {
-                                sensors.push(ain);
-                                accessories.push(new FritzTemperatureSensorAccessory(self, ain));
+                            if (device.temperature) {
+                                var ain = device.identifier.replace(/\s/g, '');
+                                if (!accessories.find(function(accessory) {
+                                    return accessory.ain && accessory.ain == ain;
+                                })) {
+                                    sensors.push(ain);
+                                    if (self.config.hide.indexOf(ain) == -1) {
+                                        accessories.push(new FritzTemperatureSensorAccessory(self, ain));
+                                    }
+                                }
                             }
                         });
                         self.log("Sensors found: %s", sensors.toString());

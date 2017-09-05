@@ -40,6 +40,7 @@ Add platform to `config.json`, for configuration see below.
       "password": "<password>",
       "url": "http://fritz.box",
       "interval": 60,
+      "hide": ["wifi", "<ain>"],
       "options": {
         "strictSSL": false
       }
@@ -53,6 +54,8 @@ The `url` and `interval` settings are optional:
 
   - `url`: Fritz!Box address
   - `interval`: polling interval for updating accessories if state was changed outside homebringe
+
+The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the guest wifi switch.
 
 To enable debugging run homebridge with `-D` option:
 

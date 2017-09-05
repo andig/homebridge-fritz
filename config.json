@@ -1,13 +1,12 @@
 {
-  // ...
-
   "platforms": [
     {
       "platform": "Fritz!Box",
-      "name": "My FritzBox",
-      "username": "<username>",
-      "password": "<password>",
+      "name": "My Fritz!Box",
+      "username": "",
+      "password": "",
       "url": "http://fritz.box",
+      "hide": [],
       "interval": 60,
       "debug": false
     }
