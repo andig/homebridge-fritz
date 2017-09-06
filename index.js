@@ -231,7 +231,12 @@ function FritzWifiAccessory(platform) {
     this.services.AccessoryInformation
         .setCharacteristic(Characteristic.Manufacturer, "AVM");
     this.services.AccessoryInformation
-        .setCharacteristic(Characteristic.Model, "FritzBox");
+        .setCharacteristic(Characteristic.Model, "Fritz!Box");
+
+    this.platform.fritz('getOSVersion').then(function(version) {
+        this.services.AccessoryInformation
+            .setCharacteristic(Characteristic.FirmwareRevision, version);
+    }.bind(this));
 
     this.services.Switch.getCharacteristic(Characteristic.On)
         .on('get', this.getOn.bind(this))
@@ -316,7 +321,7 @@ FritzAccessory.prototype.getCurrentTemperature = function(callback) {
 
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
         callback(null, temp);
-    }.bind(this));
+    });
 };
 
 
