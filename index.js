@@ -610,6 +610,10 @@ FritzThermostatAccessory.prototype.update = function() {
         self.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
     });
 
+    this.getTargetTemperature(function(foo, temp) {
+        self.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).setValue(temp, undefined, FritzPlatform.Context);
+    });
+
     // BatteryService
     this.getBatteryLevel(function(foo, batteryLevel) {
         self.services.BatteryService.getCharacteristic(Characteristic.BatteryLevel).setValue(batteryLevel, undefined, FritzPlatform.Context);
