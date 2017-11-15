@@ -287,6 +287,10 @@ function FritzAccessory(platform, ain, type) {
     this.platform = platform;
     this.ain = ain;
     this.type = type;
+
+    // fix duplicate UUID (https://github.com/andig/homebridge-fritz/issues/27)
+    this.uuid_base = type + ain;
+
     this.name = this.platform.getName(this.ain);
     this.device = this.platform.getDevice(this.ain);
 

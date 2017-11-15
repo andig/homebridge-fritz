@@ -1,5 +1,6 @@
 # homebridge-fritz
 [![NPM Version](https://img.shields.io/npm/v/homebridge-fritz.svg)](https://www.npmjs.com/package/homebridge-fritz)
+[![NPM Downloads](https://img.shields.io/npm/dt/homebridge-fritz.svg)](https://www.npmjs.com/package/homebridge-fritz)
 [![Build status](https://travis-ci.org/andig/homebridge-fritz.svg?branch=master)](https://travis-ci.org/andig/homebridge-fritz)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HGD5E9L28HQHC)
 
