@@ -605,10 +605,15 @@ FritzThermostatAccessory.prototype.update = function() {
     this.platform.log(`Updating ${this.type} ${this.ain}`);
     var self = this;
 
-    // Thermostat
-    this.getCurrentTemperature(function(foo, temp) {
-        self.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
-    });
+     // Thermostat Current
+      this.getCurrentTemperature(function(foo, temp) {
+          self.services.Thermostat.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
+      });
+      
+      // Thermostat Target
+      this.getTargetTemperature(function(foo, temp) {
+          self.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).setValue(temp, undefined, FritzPlatform.Context);
+      });
 
     // BatteryService
     this.getBatteryLevel(function(foo, batteryLevel) {
