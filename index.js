@@ -96,10 +96,7 @@ FritzPlatform.prototype = {
                 accessories.push(new FritzWifiAccessory(self));
             }
 
-            self.fritz("getDeviceList").then(function(devices) {
-                // cache list of devices in options for reuse by non-API functions
-                self.deviceList = devices;
-
+            self.updateDeviceList().then(function(devices) {
                 var jobs = [];
 
                 // outlets
