@@ -85,6 +85,7 @@ FritzPlatform.prototype = {
 
         fritz.getSessionID(this.config.username, this.config.password, this.options).then(function(sid) {
             self.log("Fritz!Box platform login successful");
+            self.log(sid);
             self.sid = sid;
         })
         .then(function() {
@@ -99,45 +100,51 @@ FritzPlatform.prototype = {
                 // cache list of devices in options for reuse by non-API functions
                 self.deviceList = devices;
 
+                var jobs = [];
+
                 // outlets
-                self.fritz("getSwitchList").then(function(ains) {
-                    self.log("Outlets found: %s", ains.toString());
+                jobs.push(self.fritz("getSwitchList").then(function(ains) {
+                    var list = ains.toString() || "none";
+                    self.log("Outlets found: %s", list);
 
                     ains.forEach(function(ain) {
                         if (self.config.hide.indexOf(ain) == -1) {
                             accessories.push(new FritzOutletAccessory(self, ain));
                         }
                     });
+                }));
 
-                    // thermostats
-                    self.fritz('getThermostatList').then(function(ains) {
-                        self.log("Thermostats found: %s", ains.toString());
+                // thermostats
+                jobs.push(self.fritz('getThermostatList').then(function(ains) {
+                    var list = ains.toString() || "none";
+                    self.log("Thermostats found: %s", list);
 
-                        ains.forEach(function(ain) {
-                            if (self.config.hide.indexOf(ain) == -1) {
-                                accessories.push(new FritzThermostatAccessory(self, ain));
-                            }
-                        });
+                    ains.forEach(function(ain) {
+                        if (self.config.hide.indexOf(ain) == -1) {
+                            accessories.push(new FritzThermostatAccessory(self, ain));
+                        }
+                    });
 
-                        // add remaining non-api devices that support temperature, e.g. Fritz!DECT 100 repeater
-                        var sensors = [];
-                        devices.forEach(function(device) {
-                            if (device.temperature) {
-                                var ain = device.identifier.replace(/\s/g, '');
-                                if (!accessories.find(function(accessory) {
-                                    return accessory.ain && accessory.ain == ain;
-                                })) {
-                                    sensors.push(ain);
-                                    if (self.config.hide.indexOf(ain) == -1) {
-                                        accessories.push(new FritzTemperatureSensorAccessory(self, ain));
-                                    }
+                    // add remaining non-api devices that support temperature, e.g. Fritz!DECT 100 repeater
+                    var sensors = [];
+                    devices.forEach(function(device) {
+                        if (device.temperature) {
+                            var ain = device.identifier.replace(/\s/g, '');
+                            if (!accessories.find(function(accessory) {
+                                return accessory.ain && accessory.ain == ain;
+                            })) {
+                                sensors.push(ain);
+                                if (self.config.hide.indexOf(ain) == -1) {
+                                    accessories.push(new FritzTemperatureSensorAccessory(self, ain));
                                 }
                             }
-                        });
-                        self.log("Sensors found: %s", sensors.toString());
-
-                        callback(accessories);
+                        }
                     });
+                    self.log("Sensors found: %s", sensors.toString());
+                }));
+
+                Promise.all(jobs).then(function() {
+                    callback(accessories);                    
                 });
             })
             .catch(function(error) {
@@ -178,9 +185,11 @@ FritzPlatform.prototype = {
                     if (error.response && error.response.statusCode == 403) {
                         return fritz.getSessionID(self.config.username, self.config.password, self.options).then(function(sid) {
                             self.log("Fritz!Box session renewed");
+                            self.log("renewed:"+sid);
                             self.sid = sid;
 
                             funcArgs = [self.sid].concat(args).concat(self.options);
+                            self.log("renewed, now calling:"+funcArgs.toString());
                             return fritzFunc.apply(self, funcArgs);
                         })
                         .catch(function(error) {

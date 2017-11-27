@@ -32,7 +32,7 @@
   "dependencies": {
     "bluebird": "^3.3.5",
     "extend": "^3.0.0",
-    "fritzapi": "^0.9.4",
+    "fritzapi": "^0.10.1",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
