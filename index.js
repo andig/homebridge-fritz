@@ -10,7 +10,7 @@
 "use strict";
 
 var fritz = require('fritzapi');
-var promise = require('bluebird');
+var Promise = require('bluebird');
 var isWebUri = require('valid-url').isWebUri;
 var inherits = require('util').inherits;
 var extend = require('extend');
@@ -104,8 +104,7 @@ FritzPlatform.prototype = {
 
                 // outlets
                 jobs.push(self.fritz("getSwitchList").then(function(ains) {
-                    var list = ains.toString() || "none";
-                    self.log("Outlets found: %s", list);
+                    self.log("Outlets found: %s", self.getArrayString(ains));
 
                     ains.forEach(function(ain) {
                         if (self.config.hide.indexOf(ain) == -1) {
@@ -116,8 +115,7 @@ FritzPlatform.prototype = {
 
                 // thermostats
                 jobs.push(self.fritz('getThermostatList').then(function(ains) {
-                    var list = ains.toString() || "none";
-                    self.log("Thermostats found: %s", list);
+                    self.log("Thermostats found: %s", self.getArrayString(ains));
 
                     ains.forEach(function(ain) {
                         if (self.config.hide.indexOf(ain) == -1) {
@@ -140,7 +138,7 @@ FritzPlatform.prototype = {
                             }
                         }
                     });
-                    self.log("Sensors found: %s", sensors.toString());
+                    self.log("Sensors found: %s", self.getArrayString(sensors));
                 }));
 
                 Promise.all(jobs).then(function() {
@@ -148,7 +146,7 @@ FritzPlatform.prototype = {
                 });
             })
             .catch(function(error) {
-                self.log.error("Could not get device list from Fritz!Box. Please check if device supports the smart home API and user has sufficient privileges.");
+                self.log.error("Could not get devices from Fritz!Box. Please check if device supports the smart home API and user has sufficient privileges.");
                 callback(accessories);
             });
         })
@@ -156,6 +154,18 @@ FritzPlatform.prototype = {
             self.log.debug(error);
             self.log.error("Fritz!Box platform login failed");
         });
+    },
+
+    getArrayString: function(array) {
+        return array.toString() || "none";
+    },
+
+    updateDeviceList: function() {
+        return this.fritz("getDeviceList").then(function(devices) {
+            // cache list of devices in options for reuse by non-API functions
+            this.deviceList = devices;
+            return devices;
+        }.bind(this));
     },
 
     getDevice: function(ain) {
@@ -174,7 +184,7 @@ FritzPlatform.prototype = {
         var args = Array.prototype.slice.call(arguments, 1);
         var self = this;
 
-        this.promise = (this.promise || promise.resolve()).reflect()
+        this.promise = (this.promise || Promise.resolve()).reflect()
             .then(function() {
                 var fritzFunc = fritz[func];
                 var funcArgs = [self.sid].concat(args).concat(self.options);
@@ -209,7 +219,7 @@ FritzPlatform.prototype = {
                 self.log.error("< %s failed", func);
                 self.promise = null;
 
-                return promise.reject(func + " failed");
+                return Promise.reject(func + " failed");
             })
         ;
 
@@ -435,23 +445,23 @@ FritzOutletAccessory.prototype.update = function() {
     // Outlet
     this.getOn(function(foo, state) {
         self.services.Outlet.getCharacteristic(Characteristic.On).setValue(state, undefined, FritzPlatform.Context);
+    });
 
-        self.getPowerUsage(function(foo, power) {
-            self.services.Outlet.getCharacteristic(FritzPlatform.PowerUsage).setValue(power, undefined, FritzPlatform.Context);
+    this.getPowerUsage(function(foo, power) {
+        self.services.Outlet.getCharacteristic(FritzPlatform.PowerUsage).setValue(power, undefined, FritzPlatform.Context);
+    });
 
-            self.getInUse(function(foo, state) {
-                self.services.Outlet.getCharacteristic(Characteristic.OutletInUse).setValue(state, undefined, FritzPlatform.Context);
+    this.getInUse(function(foo, state) {
+        self.services.Outlet.getCharacteristic(Characteristic.OutletInUse).setValue(state, undefined, FritzPlatform.Context);
+    });
 
-                self.getEnergyConsumption(function(foo, energy) {
-                    self.services.Outlet.getCharacteristic(FritzPlatform.EnergyConsumption).setValue(energy, undefined, FritzPlatform.Context);
-                });
-            });
-        });
+    this.getEnergyConsumption(function(foo, energy) {
+        self.services.Outlet.getCharacteristic(FritzPlatform.EnergyConsumption).setValue(energy, undefined, FritzPlatform.Context);
     });
 
     // TemperatureSensor
     if (this.services.TemperatureSensor) {
-        this.getCurrentTemperature(function(foo, temp) {
+        self.getCurrentTemperature(function(foo, temp) {
             self.services.TemperatureSensor.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
         });
     }
@@ -536,26 +546,48 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
         return;
 
     this.platform.log(`Setting ${this.type} ${this.ain} heating state`);
+    var self = this, future;
 
-    var temp;
     switch (state) {
         case Characteristic.TargetHeatingCoolingState.OFF:
         case Characteristic.TargetHeatingCoolingState.COOL:
-            temp = 'off';
+            future = Promise.resolve('off');
             break;
         case Characteristic.TargetHeatingCoolingState.HEAT:
-            temp = 'on';
+            future = Promise.resolve('on');
             break;
         case Characteristic.TargetHeatingCoolingState.AUTO:
-            this.platform.log("Heating state 'auto' not supported");
+            future = this.getCurrentAutoTemperature();
             break;
     }
 
-    if (temp !== null) {
-        this.platform.fritz('setTempTarget', this.ain, temp).then(function(temp) {
-            callback(null, state);
-        });
-    }
+    future.then(function(temp) {
+        if (temp !== undefined) {
+            self.platform.fritz('setTempTarget', self.ain, temp).then(function(temp) {
+                callback(null, state);
+            });
+        }
+    });
+};
+
+FritzThermostatAccessory.prototype.getCurrentAutoTemperature = function() {
+    var self = this;
+    return this.platform.updateDeviceList().then(function() {
+        var device = self.platform.getDevice(self.ain);
+        if (!device.hkr) {
+            self.platform.log.error('Could not get thermostat schedule. Fritz!OS outdated?');
+            return;
+        }
+
+        var hkr = device.hkr;
+
+        // if next change is to comfort temp, we are in night mode
+        /* jshint laxbreak:true */
+        return fritz.api2temp(hkr.nextchange.tchange === hkr.komfort
+            ? hkr.absenk
+            : hkr.komfort
+        );
+    });
 };
 
 FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
@@ -626,10 +658,10 @@ FritzThermostatAccessory.prototype.update = function() {
     // BatteryService
     this.getBatteryLevel(function(foo, batteryLevel) {
         self.services.BatteryService.getCharacteristic(Characteristic.BatteryLevel).setValue(batteryLevel, undefined, FritzPlatform.Context);
+    });
 
-        self.getStatusLowBattery(function(foo, batteryState) {
-            self.services.BatteryService.getCharacteristic(Characteristic.StatusLowBattery).setValue(batteryState, undefined, FritzPlatform.Context);
-        });
+    this.getStatusLowBattery(function(foo, batteryState) {
+        self.services.BatteryService.getCharacteristic(Characteristic.StatusLowBattery).setValue(batteryState, undefined, FritzPlatform.Context);
     });
 };
 
