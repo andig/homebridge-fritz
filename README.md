@@ -42,6 +42,7 @@ Add platform to `config.json`, for configuration see below.
       "url": "http://fritz.box",
       "interval": 60,
       "hide": ["wifi", "<ain>"],
+      "concurrent": false,
       "options": {
         "strictSSL": false
       }
@@ -51,10 +52,12 @@ Add platform to `config.json`, for configuration see below.
 
 ```
 
-The `url` and `interval` settings are optional:
+The following settings are optional:
 
   - `url`: Fritz!Box address
   - `interval`: polling interval for updating accessories if state was changed outside homebringe
+  - `hide`: a list of device AINs to exclude from homebridge control
+  - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
 
 The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the guest wifi switch.
 

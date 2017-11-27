@@ -39,6 +39,8 @@ function FritzPlatform(log, config) {
     this.options = this.config.options || {};
     this.interval = 1000 * (this.config.interval || 60);  // 1 minute
 
+    this.pending = 0; // pending requests
+
     // array of hidden devices
     if (!Array.isArray(this.config.hide)) this.config.hide = [];
 
@@ -85,7 +87,6 @@ FritzPlatform.prototype = {
 
         fritz.getSessionID(this.config.username, this.config.password, this.options).then(function(sid) {
             self.log("Fritz!Box platform login successful");
-            self.log(sid);
             self.sid = sid;
         })
         .then(function() {
@@ -181,44 +182,53 @@ FritzPlatform.prototype = {
         var args = Array.prototype.slice.call(arguments, 1);
         var self = this;
 
-        this.promise = (this.promise || Promise.resolve()).reflect()
-            .then(function() {
-                var fritzFunc = fritz[func];
-                var funcArgs = [self.sid].concat(args).concat(self.options);
+        // api call tracking
+        if (self.config.concurrent) {
+            this.promise = null;
+        }
+        else if ((this.promise || Promise.resolve()).isPending()) {
+            this.pending++;
+            this.log.debug('%s pending api calls', this.pending);
+        }
 
-                self.log.debug("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
+        this.promise = (this.promise || Promise.resolve()).reflect().then(function() {
+            self.pending = Math.max(self.pending-1, 0);
 
-                return fritzFunc.apply(self, funcArgs).catch(function(error) {
-                    if (error.response && error.response.statusCode == 403) {
-                        return fritz.getSessionID(self.config.username, self.config.password, self.options).then(function(sid) {
-                            self.log("Fritz!Box session renewed");
-                            self.log("renewed:"+sid);
-                            self.sid = sid;
+            var fritzFunc = fritz[func];
+            var funcArgs = [self.sid].concat(args).concat(self.options);
 
-                            funcArgs = [self.sid].concat(args).concat(self.options);
-                            self.log("renewed, now calling:"+funcArgs.toString());
-                            return fritzFunc.apply(self, funcArgs);
-                        })
-                        .catch(function(error) {
-                            self.log.warn("Fritz!Box session renewal failed");
-                            /* jshint laxbreak:true */
-                            throw error === "0000000000000000"
-                                ? "Invalid session id"
-                                : error;
-                        });
-                    }
+            self.log.debug("> %s (%s)", func, JSON.stringify(funcArgs.slice(0,-1)).slice(1,-1));
 
-                    throw error;
-                });
-            })
-            .catch(function(error) {
-                self.log.debug(error);
-                self.log.error("< %s failed", func);
-                self.promise = null;
+            return fritzFunc.apply(self, funcArgs).catch(function(error) {
+                if (error.response && error.response.statusCode == 403) {
+                    return fritz.getSessionID(self.config.username, self.config.password, self.options).then(function(sid) {
+                        self.log("Fritz!Box session renewed");
+                        self.log("renewed:"+sid);
+                        self.sid = sid;
 
-                return Promise.reject(func + " failed");
-            })
-        ;
+                        funcArgs = [self.sid].concat(args).concat(self.options);
+                        self.log("renewed, now calling:"+funcArgs.toString());
+                        return fritzFunc.apply(self, funcArgs);
+                    })
+                    .catch(function(error) {
+                        self.log.warn("Fritz!Box session renewal failed");
+                        /* jshint laxbreak:true */
+                        throw error === "0000000000000000"
+                            ? "Invalid session id"
+                            : error;
+                    });
+                }
+
+                throw error;
+            });
+        })
+        .catch(function(error) {
+            self.log.debug(error);
+            self.log.error("< %s failed", func);
+            self.promise = null;
+
+            return Promise.reject(func + " failed");
+        });
 
         // debug result
         this.promise.then(function(res) {
