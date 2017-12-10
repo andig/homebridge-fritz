@@ -259,8 +259,10 @@ FritzWifiAccessory.prototype.getOn = function(callback) {
 };
 
 FritzWifiAccessory.prototype.setOn = function(on, callback, context) {
-    if (context == FritzPlatform.Context)
+    if (context == FritzPlatform.Context) {
+        callback(null, on);
         return;
+    }
 
     this.platform.log("Switching guest WLAN to " + on);
 
@@ -384,8 +386,10 @@ FritzOutletAccessory.prototype.getOn = function(callback) {
 };
 
 FritzOutletAccessory.prototype.setOn = function(on, callback, context) {
-    if (context == FritzPlatform.Context)
+    if (context == FritzPlatform.Context) {
+        callback(null, on);
         return;
+    }
 
     this.platform.log(`Switching ${this.type} ${this.ain} to ` + on);
 
@@ -523,8 +527,10 @@ FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callb
 };
 
 FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state, callback, context) {
-    if (context == FritzPlatform.Context)
+    if (context == FritzPlatform.Context) {
+        callback(null, on);
         return;
+    }
 
     this.platform.log(`Setting ${this.type} ${this.ain} heating state`);
 
@@ -563,8 +569,10 @@ FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
 };
 
 FritzThermostatAccessory.prototype.setTargetTemperature = function(temp, callback, context) {
-    if (context == FritzPlatform.Context)
+    if (context == FritzPlatform.Context) {
+        callback(null, temp);
         return;
+    }
 
     this.platform.log(`Setting ${this.type} ${this.ain} target temperature`);
 
