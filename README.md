@@ -58,10 +58,6 @@ The `url` and `interval` settings are optional:
 
 The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the guest wifi switch.
 
-To enable debugging run homebridge with `-D` option:
-
-    homebridge -D
-
 
 ## Common Issues / Frequently Asked Questions
 
@@ -95,7 +91,10 @@ To enable debugging run homebridge with `-D` option:
 
 If you experience problems with this plugin please provide a homebridge logfile by running homebridge with debugging enabled:
 
-    DEBUG=* ./bin/homebridge
+    homebridge -D
+
+For even more detailed logs set `"debug": true` in the platform configuration.
+
 
 ## Acknowledgements
 
