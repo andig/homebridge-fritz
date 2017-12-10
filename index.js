@@ -528,7 +528,7 @@ FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callb
 
 FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state, callback, context) {
     if (context == FritzPlatform.Context) {
-        callback(null, on);
+        callback(null, state);
         return;
     }
 
