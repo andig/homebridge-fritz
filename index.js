@@ -253,8 +253,12 @@ FritzWifiAccessory.prototype.getServices = function() {
 FritzWifiAccessory.prototype.getOn = function(callback) {
     this.platform.log("Getting guest WLAN state");
 
+    var service = this.services.Switch;
+    callback(null, service.fritzState);
+
     this.platform.fritz('getGuestWlan').then(function(res) {
-        callback(null, res.activate_guest_access);
+        service.fritzState = res.activate_guest_access;
+        service.getCharacteristic(Characteristic.On).setValue(res.activate_guest_access, undefined, FritzPlatform.Context);
     });
 };
 
@@ -325,8 +329,13 @@ FritzAccessory.prototype.getServices = function() {
 FritzAccessory.prototype.getCurrentTemperature = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} temperature`);
 
+    // characteristic CurrentTemperature is part of multiple services
+    var service = this.services.Thermostat || this.services.TemperatureSensor;
+    callback(null, service.fritzCurrentTemperature);
+
     this.platform.fritz('getTemperature', this.ain).then(function(temp) {
-        callback(null, temp);
+        service.fritzCurrentTemperature = temp;
+        service.getCharacteristic(Characteristic.CurrentTemperature).setValue(temp, undefined, FritzPlatform.Context);
     });
 };
 
@@ -380,8 +389,12 @@ function FritzOutletAccessory(platform, ain) {
 FritzOutletAccessory.prototype.getOn = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} state`);
 
+    var service = this.services.Outlet;
+    callback(null, service.fritzState);
+
     this.platform.fritz('getSwitchState', this.ain).then(function(state) {
-        callback(null, state);
+        service.fritzState = state;
+        service.getCharacteristic(Characteristic.On).setValue(state, undefined, FritzPlatform.Context);
     });
 };
 
@@ -402,24 +415,38 @@ FritzOutletAccessory.prototype.setOn = function(on, callback, context) {
 FritzOutletAccessory.prototype.getInUse = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} in use`);
 
+    var service = this.services.Outlet;
+    callback(null, service.fritzInUse);
+
     this.platform.fritz('getSwitchPower', this.ain).then(function(power) {
-        callback(null, power > 0);
+        var inUse = power > 0;
+        service.fritzInUse = inUse;
+        service.getCharacteristic(Characteristic.OutletInUse).setValue(inUse, undefined, FritzPlatform.Context);
     });
 };
 
 FritzOutletAccessory.prototype.getPowerUsage = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} power usage`);
 
+    var service = this.services.Outlet;
+    callback(null, service.fritzPowerUsage);
+
     this.platform.fritz('getSwitchPower', this.ain).then(function(power) {
-        callback(null, power);
+        service.fritzPowerUsage = power;
+        service.getCharacteristic(FritzPlatform.PowerUsage).setValue(power, undefined, FritzPlatform.Context);
     });
 };
 
 FritzOutletAccessory.prototype.getEnergyConsumption = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} energy consumption`);
 
+    var service = this.services.Outlet;
+    callback(null, service.fritzEnergyConsumption);
+
     this.platform.fritz('getSwitchEnergy', this.ain).then(function(energy) {
-        callback(null, energy / 1000.0);
+        energy = energy / 1000.0;
+        service.fritzEnergyConsumption = energy;
+        service.getCharacteristic(FritzPlatform.EnergyConsumption).setValue(energy, undefined, FritzPlatform.Context);
     });
 };
 
@@ -504,25 +531,39 @@ function FritzThermostatAccessory(platform, ain) {
 FritzThermostatAccessory.prototype.getCurrentHeatingCoolingState = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} heating state`);
 
+    var service = this.services.Thermostat;
+    callback(null, service.fritzCurrentHeatingCoolingState);
+
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
-        if (temp == 'off')
-            callback(null, Characteristic.CurrentHeatingCoolingState.OFF);
-        else
-            callback(null, Characteristic.CurrentHeatingCoolingState.HEAT);
+        var state = temp == 'off' ? Characteristic.CurrentHeatingCoolingState.OFF : Characteristic.CurrentHeatingCoolingState.HEAT;
+
+        service.fritzCurrentHeatingCoolingState = state;
+        service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).setValue(state, undefined, FritzPlatform.Context);
     });
 };
 
 FritzThermostatAccessory.prototype.getTargetHeatingCoolingState = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} target heating state`);
-    var self = this;
+
+    var service = this.services.Thermostat;
+    callback(null, service.fritzTargetHeatingCoolingState);
 
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
-        if (temp == 'off')
-            callback(null, Characteristic.TargetHeatingCoolingState.OFF);
-        else if (temp == 'on')
-            callback(null, Characteristic.TargetHeatingCoolingState.HEAT);
-        else
-            callback(null, Characteristic.TargetHeatingCoolingState.AUTO);
+        var state;
+
+        switch (temp) {
+            case 'off':
+                state = Characteristic.TargetHeatingCoolingState.OFF;
+                break;
+            case 'on':
+                state = Characteristic.TargetHeatingCoolingState.HEAT;
+                break;
+            default:
+                state = Characteristic.TargetHeatingCoolingState.AUTO;
+        }
+
+        service.fritzTargetHeatingCoolingState = state;
+        service.getCharacteristic(Characteristic.TargetHeatingCoolingState).setValue(state, undefined, FritzPlatform.Context);
     });
 };
 
@@ -558,13 +599,17 @@ FritzThermostatAccessory.prototype.setTargetHeatingCoolingState = function(state
 FritzThermostatAccessory.prototype.getTargetTemperature = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} target temperature`);
 
+    var service = this.services.Thermostat;
+    callback(null, service.fritzTargetTemperature);
+
     this.platform.fritz('getTempTarget', this.ain).then(function(temp) {
         if (temp == 'off')
-            callback(null, this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.minValue);
+            temp = this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.minValue;
         else if (temp == 'on')
-            callback(null, this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.maxValue);
-        else
-            callback(null, temp);
+            temp = this.services.Thermostat.getCharacteristic(Characteristic.TargetTemperature).props.maxValue;
+
+        service.fritzTargetTemperature = temp;
+        service.getCharacteristic(Characteristic.TargetTemperature).setValue(temp, undefined, FritzPlatform.Context);
     }.bind(this));
 };
 
@@ -588,8 +633,12 @@ FritzThermostatAccessory.prototype.getTemperatureDisplayUnits = function(callbac
 FritzThermostatAccessory.prototype.getBatteryLevel = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} battery level`);
 
-    this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
-        callback(null, battery);
+    var service = this.services.BatteryService;
+    callback(null, service.fritzBatteryLevel);
+
+    this.platform.fritz('getBatteryCharge', this.ain).then(function(batteryLevel) {
+        service.fritzBatteryLevel = batteryLevel;
+        service.getCharacteristic(Characteristic.BatteryLevel).setValue(batteryLevel, undefined, FritzPlatform.Context);
     });
 };
 
@@ -600,12 +649,17 @@ FritzThermostatAccessory.prototype.getChargingState = function(callback) {
 FritzThermostatAccessory.prototype.getStatusLowBattery = function(callback) {
     this.platform.log(`Getting ${this.type} ${this.ain} battery status`);
 
+    var service = this.services.BatteryService;
+    callback(null, service.fritzStatusLowBattery);
+
     this.platform.fritz('getBatteryCharge', this.ain).then(function(battery) {
         /* jshint laxbreak:true */
-        callback(null, battery < 20
+        var batteryState = battery < 20
             ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-            : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
-        );
+            : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+
+        service.fritzStatusLowBattery = batteryState;
+        service.getCharacteristic(Characteristic.StatusLowBattery).setValue(batteryState, undefined, FritzPlatform.Context);
     });
 };
 
