@@ -91,6 +91,12 @@ To enable debugging run homebridge with `-D` option:
       Update your Fritz!Box user accordingly. 
 
 
+## Debugging
+
+If you experience problems with this plugin please provide a homebridge logfile by running homebridge with debugging enabled:
+
+    DEBUG=* ./bin/homebridge
+
 ## Acknowledgements
 
   - homebridge-fritz is based on the [fritzapi](https://github.com/andig/fritzapi) library
