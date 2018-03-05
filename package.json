@@ -23,7 +23,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/jshint/bin/jshint index.js"
+    "test": "node_modules/jshint/bin/jshint index.js lib"
   },
   "engines": {
     "node": ">4.0.0",
