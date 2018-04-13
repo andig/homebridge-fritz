@@ -9,7 +9,7 @@ Homebridge platform plugin for FRITZ!Box.
 
 This plugin exposes:
 
-  - Wlan guest access switch
+  - WLAN guest access switch
   - Fritz!DECT outlets (200, 210)
   - Fritz!Powerline outlets (510, 540)
   - Fritz!DECT (300) and Comet!DECT thermostats
@@ -44,7 +44,8 @@ Add platform to `config.json`, for configuration see below.
       "hide": ["wifi", "<ain>"],
       "concurrent": false,
       "options": {
-        "strictSSL": false
+        "strictSSL": false,
+        "wifiName: "Guest WLAN"
       }
     }
   ]
@@ -58,8 +59,9 @@ The following settings are optional:
   - `interval`: polling interval for updating accessories if state was changed outside homebringe
   - `hide`: a list of device AINs to exclude from homebridge control
   - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
+  - `wifiName`: custom name for the WLAN guest access switch (fallback `Guest WLAN`)
 
-The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the guest wifi switch.
+The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the WLAN guest access switch.
 
 
 ## Common Issues / Frequently Asked Questions
