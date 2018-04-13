@@ -43,9 +43,9 @@ Add platform to `config.json`, for configuration see below.
       "interval": 60,
       "hide": ["wifi", "<ain>"],
       "concurrent": false,
+      "wifiName: "Guest WLAN",
       "options": {
-        "strictSSL": false,
-        "wifiName: "Guest WLAN"
+        "strictSSL": false
       }
     }
   ]
