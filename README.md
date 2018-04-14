@@ -10,6 +10,10 @@ Homebridge platform plugin for FRITZ!Box.
 This plugin exposes:
 
   - WLAN guest access switch
+  - status LEDs as a lightbulb
+    - ON with >50% brightness: the LEDs are always on and are showing the current status of the Fritz!Box.
+    - ON with <=50% brightness: the LEDs will automatically turn off after a few minutes and stay that way during normal operation. They will light up again in case of an error or a status event.
+    - OFF: the LEDs are always off and will not show any status informations (even in the case of a Fritz!Box error).
   - Fritz!DECT outlets (200, 210)
   - Fritz!Powerline outlets (510, 540)
   - Fritz!DECT (300) and Comet!DECT thermostats
@@ -41,7 +45,7 @@ Add platform to `config.json`, for configuration see below.
       "password": "<password>",
       "url": "http://fritz.box",
       "interval": 60,
-      "hide": ["wifi", "<ain>"],
+      "hide": ["wifi", "led", "<ain>"],
       "concurrent": false,
       "wifiName: "Guest WLAN",
       "options": {
@@ -61,7 +65,7 @@ The following settings are optional:
   - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
   - `wifiName`: custom name for the WLAN guest access switch (fallback `Guest WLAN`)
 
-The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the WLAN guest access switch.
+The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the WLAN guest access or `led` for hiding the led lightbulb.
 
 
 ## Common Issues / Frequently Asked Questions
