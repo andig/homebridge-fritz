@@ -14,7 +14,7 @@ This plugin exposes:
   - Fritz!Powerline outlets (510, 540)
   - Fritz!DECT (300) and Comet!DECT thermostats
   - Fritz!DECT repeaters as temperature sensor (100)
-
+  - Window sensors including HAN FUN devices e.g. of Deutsche Telekom
 
 ## Installation
 
