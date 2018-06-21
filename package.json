@@ -33,9 +33,10 @@
     "bluebird": "^3.3.5",
     "extend": "^3.0.0",
     "fritzapi": "^0.10.3",
-    "valid-url": "^1.0.9"
+    "valid-url": "^1.0.9",
+    "tr-064": "^0.2.0"
   },
   "devDependencies": {
-    "jshint": "^2.9.2"
+    "jshint": "^2.9.5"
   }
 }
