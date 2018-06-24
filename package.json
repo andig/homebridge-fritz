@@ -1,6 +1,6 @@
 {
   "name": "homebridge-fritz",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "author": "Andreas Goetz <cpuidle@gmx.de>",
   "homepage": "https://github.com/andig/homebridge-fritz#readme",
   "description": "Homebridge platform plugin for Fritz!Box",
@@ -32,9 +32,9 @@
   "dependencies": {
     "bluebird": "^3.3.5",
     "extend": "^3.0.0",
-    "fritzapi": "^0.10.3",
-    "valid-url": "^1.0.9",
-    "tr-064": "^0.2.0"
+    "fritzapi": "^0.10.4",
+    "fritzbox": "git+https://github.com/mapero/Fritzbox.git",
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "jshint": "^2.9.5"
