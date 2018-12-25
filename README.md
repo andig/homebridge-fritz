@@ -91,6 +91,12 @@ The `hide` config options allows to specify an array of device AINs that will no
       Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
       Update your Fritz!Box user accordingly. 
 
+  4. homebridge-fritz thermostat tips for Modes and Scenes in Home App
+      
+      When Scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
+      - Off - turns the Thermostat off
+      - Heating/Cooling - sets the target temperature to the comfort/setback setting of your Fritz!Box. Your personal choice will be overwritten
+      - Auto - only sets your chosen target temperature
 
 ## Debugging
 
