@@ -6,7 +6,12 @@
       "username": "",
       "password": "",
       "url": "http://fritz.box",
-      "hide": [],
+      "devices": {
+        "wifi": {
+          "name": "Guest WLAN",
+          "display": true
+        }
+      },
       "interval": 60,
       "debug": false
     }

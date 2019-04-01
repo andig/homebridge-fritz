@@ -41,9 +41,16 @@ Add platform to `config.json`, for configuration see below.
       "password": "<password>",
       "url": "http://fritz.box",
       "interval": 60,
-      "hide": ["wifi", "<ain>"],
       "concurrent": false,
-      "wifiName": "Guest WLAN",
+      "devices": {
+        "wifi": {
+          "name": "Guest WLAN",
+          "display": true
+        },
+        "ain-1": {
+          "TemperatureSensor": false
+        }
+      }
       "options": {
         "strictSSL": false
       }
@@ -57,9 +64,12 @@ The following settings are optional:
 
   - `url`: Fritz!Box address
   - `interval`: polling interval for updating accessories if state was changed outside homebringe
-  - `hide`: a list of device AINs to exclude from homebridge control
   - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
-  - `wifiName`: custom name for the WLAN guest access switch (fallback `Guest WLAN`)
+  - `devices`: detailed configuration for individual devices. Support options are:
+    - `display: false` to disable the device, e.g. useful for main wifi
+    - `ìnvert: true` to invert open/closed behaviour of `ContactSensor`
+    - `TemperatureSensor: false` to disable the outlet's temperature sensor
+    - the `wifi` device additionally supports the `name` option for setting a custom name for the wifi guest access switch
 
 The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the WLAN guest access switch.
 
