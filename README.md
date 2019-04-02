@@ -9,12 +9,12 @@ Homebridge platform plugin for FRITZ!Box.
 
 This plugin exposes:
 
-  - WLAN guest access switch
-  - Fritz!DECT outlets (200, 210)
-  - Fritz!Powerline outlets (510, 540)
-  - Fritz!DECT (300) and Comet!DECT thermostats
-  - Fritz!DECT repeaters as temperature sensor (100)
-  - Window sensors including HAN FUN devices e.g. of Deutsche Telekom
+- WLAN guest access switch
+- Fritz!DECT outlets (200, 210)
+- Fritz!Powerline outlets (510, 540)
+- Fritz!DECT (300, 301) and Comet!DECT thermostats
+- Fritz!DECT repeaters as temperature sensor (100)
+- Window sensors including HAN FUN devices e.g. of Deutsche Telekom
 
 ## Installation
 
@@ -28,10 +28,9 @@ npm install -g homebridge-fritz
 
 Add platform to `config.json`, for configuration see below.
 
-
 ## Configuration
 
-```
+```json
 {
   "platforms": [
     {
@@ -47,10 +46,19 @@ Add platform to `config.json`, for configuration see below.
           "name": "Guest WLAN",
           "display": true
         },
-        "ain-1": {
+        "outlet-1": {
           "TemperatureSensor": false
+        },
+        "repeater-1": {
+          "TemperatureSensor": false
+        },
+        "thermostat-2": {
+          "ContactSensor": false
+        },
+        "hidden-3": {
+          "display": false
         }
-      }
+      },
       "options": {
         "strictSSL": false
       }
@@ -62,17 +70,15 @@ Add platform to `config.json`, for configuration see below.
 
 The following settings are optional:
 
-  - `url`: Fritz!Box address
-  - `interval`: polling interval for updating accessories if state was changed outside homebringe
-  - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
-  - `devices`: detailed configuration for individual devices. Support options are:
-    - `display: false` to disable the device, e.g. useful for main wifi
-    - `ìnvert: true` to invert open/closed behaviour of `ContactSensor`
-    - `TemperatureSensor: false` to disable the outlet's temperature sensor
-    - the `wifi` device additionally supports the `name` option for setting a custom name for the wifi guest access switch
-
-The `hide` config options allows to specify an array of device AINs that will not be added to homebridge. Use `wifi` for hiding the WLAN guest access switch.
-
+- `url`: Fritz!Box address
+- `interval`: polling interval for updating accessories if state was changed outside homebringe
+- `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
+- `devices`: detailed configuration for individual devices. Support options are:
+  - `display: false` to disable the device, e.g. useful for main wifi
+  - `ìnvert: true` to invert open/closed behaviour of `ContactSensor`
+  - `ContactSensor: false` to disable the thermostat's open window `ContactSensor`
+  - `TemperatureSensor: false` to disable the temperature sensors for outlets or repeaters
+  - the `wifi` device additionally supports the `name` option for setting a custom name for the wifi guest access switch
 
 ## Common Issues / Frequently Asked Questions
 
@@ -89,12 +95,10 @@ The `hide` config options allows to specify an array of device AINs that will no
 
       indicate that there are SSL security problems- most likely due to self-signed certificates. Use the `"strictSSL": false` option to disable the respective check.
 
-  
   2. homebridge-fritz is not able to update my thermostat
   
       Current FritzBox firmwares seem to ignore API updates when the thermostat has been key-locked. 
       No workaround available- please contact AVM to change this behaviour or don't use the locking mechanism.
-
 
   3. homebridge-fritz can login but not update thermostat battery charge
 
@@ -102,7 +106,7 @@ The `hide` config options allows to specify an array of device AINs that will no
       Update your Fritz!Box user accordingly. 
 
   4. homebridge-fritz thermostat tips for Modes and Scenes in Home App
-      
+
       When Scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
       - Off - turns the Thermostat off
       - Heating/Cooling - sets the target temperature to the comfort/setback setting of your Fritz!Box. Your personal choice will be overwritten
