@@ -34,10 +34,10 @@
     "dot-prop": "^4.2.0",
     "extend": "^3.0.0",
     "fritzapi": "^0.10.5",
-    "fritzbox": "git+https://github.com/mapero/Fritzbox.git",
+    "tr-064-async": "^1.0.0",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
-    "jshint": "^2.9.5"
+    "jshint": "^2.10.2"
   }
 }
