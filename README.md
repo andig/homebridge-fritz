@@ -75,7 +75,7 @@ The following settings are optional:
 - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
 - `devices`: detailed configuration for individual devices. Support options are:
   - `display: false` to disable the device, e.g. useful for main wifi
-  - `ìnvert: true` to invert open/closed behaviour of `ContactSensor`
+  - `invert: true` to invert open/closed behaviour of `ContactSensor`
   - `ContactSensor: false` to disable the thermostat's open window `ContactSensor`
   - `TemperatureSensor: false` to disable the temperature sensors for outlets or repeaters
   - the `wifi` device additionally supports the `name` option for setting a custom name for the wifi guest access switch
