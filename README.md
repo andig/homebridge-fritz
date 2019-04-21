@@ -82,35 +82,39 @@ The following settings are optional:
 
 ## Common Issues / Frequently Asked Questions
 
-  1. homebridge-fritz can't login to the FritzBox
-  
-      Some users have reported that logging into the FritzBox internally via `https` fails. This seems to be caused by the FritzApp *occupying* the same port.
-      In this case you can connect internally via `http` or use the external IP.
+1. Can't login to the FritzBox
 
-        `Fritz!Box platform login failed` messages can be caused by invalid login data or wrong url.
+    Some users have reported that logging into the FritzBox internally via `https` fails. This seems to be caused by the FritzApp *occupying* the same port.
+    In this case you can connect internally via `http` or use the external IP.
 
-      Log messages if the form of:
+      `Fritz!Box platform login failed` messages can be caused by invalid login data or wrong url.
 
-          { error: { [Error: self signed certificate] code: 'DEPTH_ZERO_SELF_SIGNED_CERT' }
+    Log messages if the form of:
 
-      indicate that there are SSL security problems- most likely due to self-signed certificates. Use the `"strictSSL": false` option to disable the respective check.
+        { error: { [Error: self signed certificate] code: 'DEPTH_ZERO_SELF_SIGNED_CERT' }
 
-  2. homebridge-fritz is not able to update my thermostat
-  
-      Current FritzBox firmwares seem to ignore API updates when the thermostat has been key-locked. 
-      No workaround available- please contact AVM to change this behaviour or don't use the locking mechanism.
+    indicate that there are SSL security problems- most likely due to self-signed certificates. Use the `"strictSSL": false` option to disable the respective check.
 
-  3. homebridge-fritz can login but not update thermostat battery charge
+2. Unable to update my thermostat
 
-      Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
-      Update your Fritz!Box user accordingly. 
+    Current FritzBox firmwares seem to ignore API updates when the thermostat has been key-locked. 
+    No workaround available- please contact AVM to change this behaviour or don't use the locking mechanism.
 
-  4. homebridge-fritz thermostat tips for Modes and Scenes in Home App
+3. Unable to update thermostat battery charge
 
-      When Scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
-      - Off - turns the Thermostat off
-      - Heating/Cooling - sets the target temperature to the comfort/setback setting of your Fritz!Box. Your personal choice will be overwritten
-      - Auto - only sets your chosen target temperature
+    Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
+    Update your Fritz!Box user accordingly. 
+
+5. Can't update guest wifi
+
+    Updating guest wifi requires both a FritzBox username and in some cases an https/ssl connection to the FritzBox. Make sure that the `only password` option of the FritzBox is disabled or `401 - unauthorized` errors may be experienced in the logfile.
+
+4. Tips for using thermostat with Home App modes and scenes
+
+    When scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
+    - Off - turns the Thermostat off
+    - Heating/Cooling - sets the target temperature to the comfort/setback setting of your Fritz!Box. Your personal choice will be overwritten
+    - Auto - only sets your chosen target temperature
 
 ## Debugging
 
