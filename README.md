@@ -105,9 +105,9 @@ The following settings are optional:
     Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
     Update your Fritz!Box user accordingly. 
 
-5. Can't update guest wifi
+5. Can't toggle guest wifi
 
-    Updating guest wifi requires both a FritzBox username and in some cases an https/ssl connection to the FritzBox. Make sure that the `only password` option of the FritzBox is disabled or `401 - unauthorized` errors may be experienced in the logfile.
+    Updating guest wifi state requires both a FritzBox username, password and in some cases an https/ssl connection to the FritzBox. If you use the `password only` option (System > FritzBox Users > Login method) of the FritzBox, make sure you provide any random username value at the `"username"` parameter, otherwise `401 - unauthorized` errors may occur.
 
 4. Tips for using thermostat with Home App modes and scenes
 
