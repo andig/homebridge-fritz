@@ -73,7 +73,7 @@ The following settings are optional:
 - `url`: Fritz!Box address
 - `interval`: polling interval for updating accessories if state was changed outside homebringe
 - `concurrent`: allow concurrent api requests for newer Fritz!BOXes with better performance (experimental)
-- `devices`: detailed configuration for individual devices. Support options are:
+- `devices`: detailed configuration for individual devices. To be uniquely addressable, each device uses its `AIN` as key. The guest wifi device is always called `wifi`. Supported device configuration options are:
   - `display: false` to disable the device, e.g. useful for main wifi
   - `invert: true` to invert open/closed behaviour of `ContactSensor`
   - `ContactSensor: false` to disable the thermostat's open window `ContactSensor`
