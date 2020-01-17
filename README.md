@@ -13,6 +13,7 @@ This plugin exposes:
 - Fritz!DECT outlets (200, 210)
 - Fritz!Powerline outlets (510, 540)
 - Fritz!DECT (300, 301) and Comet!DECT thermostats
+- Fritz!DECT (400) buttons
 - Fritz!DECT repeaters as temperature sensor (100)
 - Window sensors including HAN FUN devices e.g. of Deutsche Telekom
 
@@ -22,9 +23,7 @@ Follow the homebridge installation instructions at [homebridge](https://www.npmj
 
 Install this plugin globally:
 
-```
-npm install -g homebridge-fritz
-```
+    npm install -g homebridge-fritz
 
 Add platform to `config.json`, for configuration see below.
 
@@ -105,11 +104,11 @@ The following settings are optional:
     Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
     Update your Fritz!Box user accordingly. 
 
-5. Can't toggle guest wifi
+4. Can't toggle guest wifi
 
     Updating guest wifi state requires both a FritzBox username, password and in some cases an https/ssl connection to the FritzBox. If you use the `password only` option (System > FritzBox Users > Login method) of the FritzBox, make sure you provide any random username value at the `"username"` parameter, otherwise `401 - unauthorized` errors may occur.
 
-4. Tips for using thermostat with Home App modes and scenes
+5. Tips for using thermostat with Home App modes and scenes
 
     When scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
     - Off - turns the Thermostat off
@@ -127,6 +126,6 @@ For even more detailed logs set `"debug": true` in the platform configuration.
 
 ## Acknowledgements
 
-  - homebridge-fritz is based on the [fritzapi](https://github.com/andig/fritzapi) library
-  - Original non-working fritz accessory https://github.com/tommasomarchionni/homebridge-FRITZBox
-  - Platform implementation inspired by https://github.com/rudders/homebridge-platform-wemo.
+- homebridge-fritz is based on the [fritzapi](https://github.com/andig/fritzapi) library
+- Original non-working fritz accessory https://github.com/tommasomarchionni/homebridge-FRITZBox
+- Platform implementation inspired by https://github.com/rudders/homebridge-platform-wemo.
