@@ -110,10 +110,10 @@ The following settings are optional:
 
 5. Tips for using thermostat with Home App modes and scenes
 
-    When scenes are used in the Home App, a target temperature and mode have to be set. There are the modes Off, Heating, Cooling and Auto. Auto works best for Scenes.
-    - Off - turns the Thermostat off
-    - Heating/Cooling - sets the target temperature to the comfort/setback setting of your Fritz!Box. Your personal choice will be overwritten
-    - Auto - only sets your chosen target temperature
+    When scenes are used in the Home App, a target temperature have to be set. There are the modes Off and On.
+    - Off - Switches off the thermostat
+    - On - Set the selected temperature
+    * Depending on the target and actual temperature, Homekit shows the thermostat as "cooling" or "heating"
 
 ## Debugging
 
