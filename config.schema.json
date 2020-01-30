@@ -1,0 +1,50 @@
+{
+    "pluginAlias": "Fritz!Box",
+    "pluginType": "platform",
+    "singular": false,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "required": true
+            },
+            "username": {
+                "title": "User name",
+                "type": "string",
+                "required": true,
+                "description": "Your Fritz!Box user name."
+            },
+            "password": {
+                "title": "Password",
+                "type": "string",
+                "required": true,
+                "description": "Your Fritz!Box password"
+            },
+            "url": {
+                "title": "URL",
+                "type": "string",
+                "required" : true,
+                "default": "http://fritz.box",
+                "description": "URL of your Fritz!Box"
+            },
+            "interval": {
+                "title": "Interval",
+                "type": "integer",
+                "default": 60,
+                "description": "Interval"
+            },
+            "options": {
+                "title": "Options",
+                "type": "boolean",
+                "description": "Use StrictSSL of your Fritz!Box"
+            }
+        }
+    }
+}
+
+
+
+
+
