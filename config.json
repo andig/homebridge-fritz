@@ -1,8 +1,8 @@
 {
   "platforms": [
     {
-      "platform": "Fritz!Box",
-      "name": "My Fritz!Box",
+      "platform": "FRITZ!Box",
+      "name": "My FRITZ!Box",
       "username": "",
       "password": "",
       "url": "http://fritz.box",

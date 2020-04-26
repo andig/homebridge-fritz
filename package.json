@@ -3,7 +3,7 @@
   "version": "0.9.4",
   "author": "Andreas Goetz <cpuidle@gmx.de>",
   "homepage": "https://github.com/andig/homebridge-fritz#readme",
-  "description": "Homebridge platform plugin for Fritz!Box",
+  "description": "Homebridge platform plugin for FRITZ!Box",
   "keywords": [
     "homebridge-plugin",
     "homebridge",

@@ -10,11 +10,11 @@ Homebridge platform plugin for FRITZ!Box.
 This plugin exposes:
 
 - WLAN guest access switch
-- Fritz!DECT outlets (200, 210)
-- Fritz!Powerline outlets (510, 540)
-- Fritz!DECT (300, 301) and Comet!DECT thermostats
-- Fritz!DECT (400) buttons
-- Fritz!DECT repeaters as temperature sensor (100)
+- FRITZ!DECT outlets (200, 210)
+- FRITZ!Powerline outlets (510, 540)
+- FRITZ!DECT (300, 301) and Comet!DECT thermostats
+- FRITZ!DECT (400) buttons
+- FRITZ!DECT repeaters as temperature sensor (100)
 - Window sensors including HAN FUN devices e.g. of Deutsche Telekom
 
 ## Installation
@@ -33,8 +33,8 @@ Add platform to `config.json`, for configuration see below.
 {
   "platforms": [
     {
-      "platform": "Fritz!Box",
-      "name": "My FritzBox",
+      "platform": "FRITZ!Box",
+      "name": "My FRITZ!Box",
       "username": "<username>",
       "password": "<password>",
       "url": "http://fritz.box",
@@ -69,7 +69,7 @@ Add platform to `config.json`, for configuration see below.
 
 The following settings are optional:
 
-- `url`: Fritz!Box address
+- `url`: FRITZ!Box address
 - `interval`: polling interval for updating accessories if state was changed outside homebringe
 - `concurrent`: set to `false` to avoid concurrent api requests. May work more stable on older FRITZ!Boxes but has slower performance
 - `devices`: detailed configuration for individual devices. To be uniquely addressable, each device uses its `AIN` as key. The guest wifi device is always called `wifi`. Supported device configuration options are:
@@ -81,12 +81,12 @@ The following settings are optional:
 
 ## Common Issues / Frequently Asked Questions
 
-1. Can't login to the FritzBox
+1. Can't login to the FRITZ!Box
 
-    Some users have reported that logging into the FritzBox internally via `https` fails. This seems to be caused by the FritzApp *occupying* the same port.
+    Some users have reported that logging into the FRITZ!Box internally via `https` fails. This seems to be caused by the FritzApp *occupying* the same port.
     In this case you can connect internally via `http` or use the external IP.
 
-      `Fritz!Box platform login failed` messages can be caused by invalid login data or wrong url.
+      `FRITZ!Box platform login failed` messages can be caused by invalid login data or wrong url.
 
     Log messages if the form of:
 
@@ -96,17 +96,17 @@ The following settings are optional:
 
 2. Unable to update my thermostat
 
-    Current FritzBox firmwares seem to ignore API updates when the thermostat has been key-locked. 
+    Current FRITZ!Box firmwares seem to ignore API updates when the thermostat has been key-locked.
     No workaround available- please contact AVM to change this behaviour or don't use the locking mechanism.
 
 3. Unable to update thermostat battery charge
 
-    Battery charge is not an API function. That means that the user must have access to FritzBox administration, not only to the SmartHome API in order to use this functionality. 
-    Update your Fritz!Box user accordingly. 
+    Battery charge is not an API function. That means that the user must have access to FRITZ!Box administration, not only to the SmartHome API in order to use this functionality.
+    Update your FRITZ!Box user accordingly.
 
 4. Can't toggle guest wifi
 
-    Updating guest wifi state requires both a FritzBox username, password and in some cases an https/ssl connection to the FritzBox. If you use the `password only` option (System > FritzBox Users > Login method) of the FritzBox, make sure you provide any random username value at the `"username"` parameter, otherwise `401 - unauthorized` errors may occur.
+    Updating guest wifi state requires both a FRITZ!Box username, password and in some cases an https/ssl connection to the FRITZ!Box. If you use the `password only` option (System > FRITZ!Box Users > Login method) of the FRITZ!Box, make sure you provide any random username value at the `"username"` parameter, otherwise `401 - unauthorized` errors may occur.
 
 5. Tips for using thermostat with Home App modes and scenes
 
