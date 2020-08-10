@@ -33,7 +33,7 @@
     "bluebird": "^3.3.5",
     "dot-prop": "^5.1.0",
     "extend": "^3.0.0",
-    "fritzapi": "^0.10.5",
+    "fritzapi": "^0.11.0",
     "tr-064-async": "^1.0.0",
     "valid-url": "^1.0.9"
   },
