@@ -14,6 +14,7 @@ This plugin exposes:
 - FRITZ!Powerline outlets (510, 540)
 - FRITZ!DECT (300, 301) and Comet!DECT thermostats
 - FRITZ!DECT (400) buttons
+- FRITZ!DECT (440) temperature & humidity sensors
 - FRITZ!DECT repeaters as temperature sensor (100)
 - Window sensors including HAN FUN devices e.g. of Deutsche Telekom
 
